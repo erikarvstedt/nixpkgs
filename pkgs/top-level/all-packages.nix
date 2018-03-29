@@ -4591,6 +4591,8 @@ with pkgs;
   riemann_c_client = callPackage ../tools/misc/riemann-c-client { };
   riemann-tools = callPackage ../tools/misc/riemann-tools { };
 
+  ripme = callPackage ../tools/misc/ripme { };
+
   ripmime = callPackage ../tools/networking/ripmime {};
 
   rkflashtool = callPackage ../tools/misc/rkflashtool { };
