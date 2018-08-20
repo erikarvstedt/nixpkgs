@@ -511,6 +511,8 @@ in {
     slurm = pkgs.slurm;
   };
 
+  pytest-env = callPackage ../development/python-modules/pytest-env { };
+
   pytest-tornado = callPackage ../development/python-modules/pytest-tornado { };
 
   python-hosts = callPackage ../development/python-modules/python-hosts { };
