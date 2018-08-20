@@ -330,6 +330,8 @@ in {
 
   i3ipc = callPackage ../development/python-modules/i3ipc { };
 
+  inotify_simple = callPackage ../development/python-modules/inotify_simple { };
+
   intelhex = callPackage ../development/python-modules/intelhex { };
 
   jira = callPackage ../development/python-modules/jira { };
