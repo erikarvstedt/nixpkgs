@@ -322,6 +322,7 @@ in rec {
   tests.jenkins = callTest tests/jenkins.nix {};
   tests.ostree = callTest tests/ostree.nix {};
   tests.osquery = callTest tests/osquery.nix {};
+  tests.paperless = callTest tests/paperless.nix {};
   tests.plasma5 = callTest tests/plasma5.nix {};
   tests.plotinus = callTest tests/plotinus.nix {};
   tests.keymap = callSubTests tests/keymap.nix {};
