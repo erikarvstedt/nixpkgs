@@ -4566,6 +4566,8 @@ in {
 
   django_compat = callPackage ../development/python-modules/django-compat { };
 
+  django-crispy-forms = callPackage ../development/python-modules/django-crispy-forms { };
+
   django_environ = buildPythonPackage rec {
     name = "django-environ-${version}";
     version = "0.4.0";
