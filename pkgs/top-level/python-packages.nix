@@ -388,6 +388,8 @@ in {
 
   pdfminer = callPackage ../development/python-modules/pdfminer_six { };
 
+  pdftotext = callPackage ../development/python-modules/pdftotext { };
+
   pdfx = callPackage ../development/python-modules/pdfx { };
 
   phonopy = callPackage ../development/python-modules/phonopy { };
