@@ -302,6 +302,8 @@ in {
 
   fire = callPackage ../development/python-modules/fire { };
 
+  filemagic = callPackage ../development/python-modules/filemagic { };
+
   genanki = callPackage ../development/python-modules/genanki { };
 
   globus-sdk = callPackage ../development/python-modules/globus-sdk { };
