@@ -304,6 +304,8 @@ in {
 
   filemagic = callPackage ../development/python-modules/filemagic { };
 
+  fuzzywuzzy = callPackage ../development/python-modules/fuzzywuzzy { };
+
   genanki = callPackage ../development/python-modules/genanki { };
 
   globus-sdk = callPackage ../development/python-modules/globus-sdk { };
