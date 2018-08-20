@@ -338,6 +338,8 @@ in {
     mpi = pkgs.openmpi;
   };
 
+  langdetect = callPackage ../development/python-modules/langdetect { };
+
   lmtpd = callPackage ../development/python-modules/lmtpd { };
 
   logster = callPackage ../development/python-modules/logster { };
