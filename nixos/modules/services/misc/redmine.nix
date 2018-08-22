@@ -202,18 +202,18 @@ in
 
     };
 
-    users.extraUsers = optionalAttrs (cfg.user == "redmine") (singleton
-      { name = "redmine";
-        group = cfg.group;
-        home = cfg.stateDir;
-        createHome = true;
-        uid = config.ids.uids.redmine;
-      });
+    users.extraUsers = optional (cfg.user == "redmine") {
+      name = "redmine";
+      group = cfg.group;
+      home = cfg.stateDir;
+      createHome = true;
+      uid = config.ids.uids.redmine;
+    };
 
-    users.extraGroups = optionalAttrs (cfg.group == "redmine") (singleton
-      { name = "redmine";
-        gid = config.ids.gids.redmine;
-      });
+    users.extraGroups = optional (cfg.group == "redmine") {
+      name = "redmine";
+      gid = config.ids.gids.redmine;
+    );
 
     warnings = optional (cfg.database.password != "")
       ''config.services.redmine.database.password will be stored as plaintext
