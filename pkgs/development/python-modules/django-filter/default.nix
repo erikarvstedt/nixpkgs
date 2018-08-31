@@ -1,4 +1,5 @@
-{ lib, buildPythonPackage, fetchPypi }:
+{ lib, buildPythonPackage, fetchPypi
+, django, django-crispy-forms, djangorestframework, mock, pytz }:
 
 buildPythonPackage rec {
   pname = "django-filter";
@@ -9,7 +10,9 @@ buildPythonPackage rec {
     sha256 = "0slpfqfhnjrzlrb6vmswyhrzn01p84s16j2x1xib35gg4fxg23pc";
   };
 
-  doCheck = false;
+  checkInputs = [ django django-crispy-forms djangorestframework mock pytz ];
+
+  checkPhase = "python runtests.py";
 
   meta = with lib; {
     description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically.";
