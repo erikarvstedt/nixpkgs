@@ -1,4 +1,4 @@
-{ lib, buildPythonPackage, fetchPypi }:
+{ lib, buildPythonPackage, fetchPypi, click, ipython }:
 
 buildPythonPackage rec {
   pname = "python-dotenv";
@@ -9,7 +9,7 @@ buildPythonPackage rec {
     sha256 = "1mc901wfxd0sxw0baqcb08dh66waarkfcx4r009ic4apa8c3d5sh";
   };
 
-  doCheck = false;
+  checkInputs = [ click ipython ];
 
   meta = with lib; {
     description = "Add .env support to your django/flask apps in development and deployments";
