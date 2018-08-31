@@ -99,7 +99,7 @@ let
       srcDir=$out/share/paperless
       mkdir -p $out/bin $out/share
       cp -r $src/src $srcDir
-      chmod +w $srcDir
+      chmod -R +w $srcDir
       cp $src/LICENSE $srcDir
 
       ### Patches
@@ -112,6 +112,10 @@ let
       testFile=$srcDir/paperless_tesseract/tests/test_date.py
       chmod +w $testFile $(dirname $testFile)
       sed -i -z 's/\(SCRATCH.,\s*\)SAMPLE_FILES/\1SCRATCH/g' $testFile
+
+      ### Compile
+
+      ${python}/bin/python -m compileall $srcDir
 
       ### Scripts
 
