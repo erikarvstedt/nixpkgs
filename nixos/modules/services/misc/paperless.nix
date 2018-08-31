@@ -96,13 +96,11 @@ in
 
       setupDB = ''
         if [[ ! -e "${cfg.dataDir}" ]]; then
-          mkdir -p "${cfg.dataDir}"
-          chown ${cfg.user}:$(id -gn ${cfg.user}) "${cfg.dataDir}"
+          install -o ${cfg.user} -g $(id -gn ${cfg.user}) -d "${cfg.dataDir}"
         fi
         ${optionalString cfg.consumptionDirIsPublic ''
           if [[ ! -e "${cfg.consumptionDir}" ]]; then
-            mkdir -p -m777 "${cfg.consumptionDir}"
-            chown ${cfg.user}:$(id -gn ${cfg.user}) "${cfg.consumptionDir}"
+            install -o ${cfg.user} -g $(id -gn ${cfg.user}) -m 777 -d "${cfg.consumptionDir}"
           fi
         ''}
         exec ${pkgs.libuuid}/bin/runuser -u "${cfg.user}" -- ${migrate}
