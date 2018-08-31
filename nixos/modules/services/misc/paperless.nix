@@ -17,7 +17,7 @@ in
     };
 
     consumptionDir = mkOption {
-      type = with types; nullOr str;
+      type = types.str;
       default = "${cfg.dataDir}/consume";
       defaultText = "\${dataDir}/consume";
       description = "Directory from which new documents are imported.";
