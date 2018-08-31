@@ -63,8 +63,9 @@ in
       type = types.bool;
       default = true;
       description = ''
-        Whether the database should be automatically created and migrated
-        on updates.
+        When enabled, the database is automatically created when it doesn't exist and updated
+        when the Paperless package has changed.
+        Both tasks are achieved by running a Django migration.
       '';
     };
 
