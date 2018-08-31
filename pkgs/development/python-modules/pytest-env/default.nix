@@ -12,7 +12,7 @@ buildPythonPackage rec {
   propagatedBuildInputs = [ pytest ];
 
   meta = with lib; {
-    description = "pytest plugin used to set environment variables";
+    description = "Pytest plugin used to set environment variables";
     homepage = https://github.com/MobileDynasty/pytest-env;
     license = licenses.mit;
   };
