@@ -132,6 +132,7 @@ let
         (source $out/share/paperless/setup-env.sh
          export HOME=$(pwd)
          cd $paperlessSrc
+         # Prevent pytest from creating unneeded cache files in $paperlessSrc
          pytest -p no:cacheprovider)
       ''}
     '';
