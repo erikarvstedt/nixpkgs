@@ -1,20 +1,21 @@
-{ stdenv, lib, buildPythonPackage, fetchPypi, file }:
+{ stdenv, lib, buildPythonPackage, fetchFromGitHub, file }:
 
 buildPythonPackage rec {
   pname = "filemagic";
   version = "1.6";
 
-  src = fetchPypi {
-    inherit pname version;
-    sha256 = "1wyvss8xk0l0ys56ivbzvdxp32cglzw5pg0fdx0gw808yjg3b176";
+  # Don't use the PyPI source because it's missing files required for testing
+  src = fetchFromGitHub {
+    owner = "aliles";
+    repo = "filemagic";
+    rev = "138649062f769fb10c256e454a3e94ecfbf3017b";
+    sha256 = "1jxf928jjl2v6zv8kdnfqvywdwql1zqkm1v5xn1d5w0qjcg38d4n";
   };
 
   postPatch = ''
     substituteInPlace magic/api.py --replace "ctypes.util.find_library('magic')" \
       "'${file}/lib/libmagic${stdenv.hostPlatform.extensions.sharedLibrary}'"
   '';
-
-  doCheck = false;
 
   meta = with lib; {
     description = "File type identification using libmagic";
