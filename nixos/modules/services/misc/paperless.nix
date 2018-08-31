@@ -41,7 +41,7 @@ in
       description = "Server port.";
     };
 
-    config = mkOption {
+    extraConfig = mkOption {
       type = types.attrs;
       default = {};
       description = ''
@@ -89,7 +89,7 @@ in
         config = {
           PAPERLESS_DISABLE_LOGIN = "true";
           PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
-        } // cfg.config;
+        } // cfg.extraConfig;
         inherit (cfg) dataDir;
         paperlessDrv = cfg.package;
       };
