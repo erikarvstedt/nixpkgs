@@ -50,13 +50,13 @@ with lib;
 let
   paperless = stdenv.mkDerivation rec {
     name = "paperless-${version}";
-    version = "2.1.0";
+    version = "2.3.0";
 
     src = fetchFromGitHub {
       owner = "danielquinn";
       repo = "paperless";
       rev = version;
-      sha256 = "0k8a398xp8h0pqcqna74z1adsiq8skckv8hv34312876255brbfq";
+      sha256 = "0vjh4ricvrnq1cg9fciwvrd7mbkal4cddi6w2d17h7vsvdi5iymv";
     };
 
     inherit python;
@@ -67,6 +67,7 @@ let
       dateutil
       django
       django-crispy-forms
+      django-cors-headers
       django-filter
       django-flat-responsive
       django_extensions
@@ -107,11 +108,6 @@ let
       # Remove command arguments for pytest_xdist, which is broken in nixpkgs
       chmod +w $srcDir/setup.cfg
       sed -i 's/ -n auto//' $srcDir/setup.cfg
-
-      # Stop tests from writing to the source tree
-      testFile=$srcDir/paperless_tesseract/tests/test_date.py
-      chmod +w $testFile $(dirname $testFile)
-      sed -i -z 's/\(SCRATCH.,\s*\)SAMPLE_FILES/\1SCRATCH/g' $testFile
 
       ### Compile
 
