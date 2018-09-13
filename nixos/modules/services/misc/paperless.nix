@@ -87,8 +87,9 @@ in
     let
       runner = cfg.package.withConfig {
         config = {
-          PAPERLESS_DISABLE_LOGIN = "true";
           PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
+          PAPERLESS_INLINE_DOC = "true";
+          PAPERLESS_DISABLE_LOGIN = "true";
         } // cfg.extraConfig;
         inherit (cfg) dataDir;
         paperlessDrv = cfg.package;
