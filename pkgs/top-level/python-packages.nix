@@ -4566,6 +4566,8 @@ in {
 
   django_compat = callPackage ../development/python-modules/django-compat { };
 
+  django-cors-headers = callPackage ../development/python-modules/django-cors-headers { };
+
   django-crispy-forms = callPackage ../development/python-modules/django-crispy-forms { };
 
   django_environ = buildPythonPackage rec {
