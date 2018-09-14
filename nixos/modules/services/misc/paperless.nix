@@ -5,6 +5,21 @@ let
   cfg = config.services.paperless;
 
   defaultUser = "paperless";
+
+  manage = cfg.package.withConfig {
+    config = {
+      PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
+      PAPERLESS_INLINE_DOC = "true";
+      PAPERLESS_DISABLE_LOGIN = "true";
+    } // cfg.extraConfig;
+    inherit (cfg) dataDir;
+    paperlessDrv = cfg.package;
+  };
+
+  managePkg = pkgs.runCommand "paperless-manage" {} ''
+    mkdir -p $out/bin
+    ln -s ${manage} $out/bin/paperless-manage
+  '';
 in
 {
   options.services.paperless = {
@@ -49,6 +64,11 @@ in
 
         See <literal>paperless-src/paperless.conf.example</literal> for available options.
 
+        To enable user authentication, set <literal>PAPERLESS_DISABLE_LOGIN = "false"</literal>,
+        add <literal>environment.systemPackages = [ config.services.paperless.manage ]</literal>
+        to your NixOS config and run the shell command
+        <literal>paperless-manage createsuperuser</literal>.
+
         To define secret options without storing them in /nix/store, use the following pattern:
         <literal>PAPERLESS_PASSPHRASE = "$(&lt; /etc/my_passphrase_file)"</literal>
       '';
@@ -81,20 +101,23 @@ in
       defaultText = "pkgs.paperless";
       description = "The Paperless package to use.";
     };
+
+    manage = mkOption {
+      type = types.package;
+      readOnly = true;
+      default = managePkg;
+      description = ''
+        A package that includes a <literal>paperless-manage</literal> command
+        to manage the Paperless instance.
+        It wraps Django's manage.py and can be installed by adding
+        <literal>environment.systemPackages = [ config.services.paperless.manage ]</literal>
+        to your NixOS config.
+      '';
+    };
   };
 
   config = mkIf cfg.enable (
     let
-      runner = cfg.package.withConfig {
-        config = {
-          PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
-          PAPERLESS_INLINE_DOC = "true";
-          PAPERLESS_DISABLE_LOGIN = "true";
-        } // cfg.extraConfig;
-        inherit (cfg) dataDir;
-        paperlessDrv = cfg.package;
-      };
-
       setupDB = ''
         if [[ ! -e "${cfg.dataDir}" ]]; then
           install -o ${cfg.user} -g $(id -gn ${cfg.user}) -d "${cfg.dataDir}"
@@ -109,7 +132,7 @@ in
 
       migrate = pkgs.writeScript "migrate" ''
         #!${pkgs.stdenv.shell} -e
-        ${runner.setupEnv}
+        ${manage.setupEnv}
         versionFile="$PAPERLESS_DBDIR/src-version"
 
         if [[ $(cat "$versionFile" 2>/dev/null) != ${cfg.package} ]]; then
@@ -124,7 +147,7 @@ in
           serviceConfig = {
             PermissionsStartOnly = true;
             User = cfg.user;
-            ExecStart = "${runner} document_consumer";
+            ExecStart = "${manage} document_consumer";
             Restart = "always";
           };
           wantedBy = [ "multi-user.target" ];
@@ -137,7 +160,7 @@ in
           description = "Paperless document server";
           serviceConfig = {
             User = cfg.user;
-            ExecStart = "${runner} runserver --noreload ${cfg.address}:${toString cfg.port}";
+            ExecStart = "${manage} runserver --noreload ${cfg.address}:${toString cfg.port}";
             Restart = "always";
           };
           # Bind to `paperless-consumer` so that the server never runs
