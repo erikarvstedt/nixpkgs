@@ -15,11 +15,6 @@ let
     inherit (cfg) dataDir;
     paperlessDrv = cfg.package;
   };
-
-  managePkg = pkgs.runCommand "paperless-manage" {} ''
-    mkdir -p $out/bin
-    ln -s ${manage} $out/bin/paperless-manage
-  '';
 in
 {
   options.services.paperless = {
@@ -64,10 +59,8 @@ in
 
         See <literal>paperless-src/paperless.conf.example</literal> for available options.
 
-        To enable user authentication, set <literal>PAPERLESS_DISABLE_LOGIN = "false"</literal>,
-        add <literal>environment.systemPackages = [ config.services.paperless.manage ]</literal>
-        to your NixOS config and run the shell command
-        <literal>paperless-manage createsuperuser</literal>.
+        To enable user authentication, set <literal>PAPERLESS_DISABLE_LOGIN = "false"</literal>
+        and run the shell command <literal>$dataDir/paperless-manage createsuperuser</literal>.
 
         To define secret options without storing them in /nix/store, use the following pattern:
         <literal>PAPERLESS_PASSPHRASE = "$(&lt; /etc/my_passphrase_file)"</literal>
@@ -105,13 +98,11 @@ in
     manage = mkOption {
       type = types.package;
       readOnly = true;
-      default = managePkg;
+      default = manage;
       description = ''
-        A package that includes a <literal>paperless-manage</literal> command
-        to manage the Paperless instance.
-        It wraps Django's manage.py and can be installed by adding
-        <literal>environment.systemPackages = [ config.services.paperless.manage ]</literal>
-        to your NixOS config.
+        A script to manage the Paperless instance.
+        It wraps Django's manage.py and is also available at
+        <literal>$dataDir/manage-paperless</literal>
       '';
     };
   };
@@ -121,6 +112,9 @@ in
       preStart = ''
         if [[ ! -e "${cfg.dataDir}" ]]; then
           install -o ${cfg.user} -g $(id -gn ${cfg.user}) -d "${cfg.dataDir}"
+        fi
+        if [[ $(readlink ${cfg.dataDir}/paperless-manage) != ${manage} ]]; then
+          ln -sf ${manage} ${cfg.dataDir}/paperless-manage
         fi
       '' + optionalString cfg.consumptionDirIsPublic ''
         if [[ ! -e "${cfg.consumptionDir}" ]]; then
