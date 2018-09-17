@@ -118,19 +118,20 @@ in
 
   config = mkIf cfg.enable (
     let
-      setupDB = ''
+      preStart = ''
         if [[ ! -e "${cfg.dataDir}" ]]; then
           install -o ${cfg.user} -g $(id -gn ${cfg.user}) -d "${cfg.dataDir}"
         fi
-        ${optionalString cfg.consumptionDirIsPublic ''
-          if [[ ! -e "${cfg.consumptionDir}" ]]; then
-            install -o ${cfg.user} -g $(id -gn ${cfg.user}) -m 777 -d "${cfg.consumptionDir}"
-          fi
-        ''}
-        exec ${pkgs.libuuid}/bin/runuser -u "${cfg.user}" -- ${migrate}
+      '' + optionalString cfg.consumptionDirIsPublic ''
+        if [[ ! -e "${cfg.consumptionDir}" ]]; then
+          install -o ${cfg.user} -g $(id -gn ${cfg.user}) -m 777 -d "${cfg.consumptionDir}"
+        fi
+      '' + optionalString cfg.autoSetupDB ''
+        exec ${pkgs.libuuid}/bin/runuser -u "${cfg.user}" -- ${setupDB}
       '';
 
-      migrate = pkgs.writeScript "migrate" ''
+      # Auto-migrate on first run or if the package has changed
+      setupDB = pkgs.writeScript "setupDB" ''
         #!${pkgs.stdenv.shell} -e
         ${manage.setupEnv}
         versionFile="$PAPERLESS_DBDIR/src-version"
@@ -151,10 +152,8 @@ in
             Restart = "always";
           };
           wantedBy = [ "multi-user.target" ];
-        } // (optionalAttrs cfg.autoSetupDB {
-          # Auto-migrate on first run or if the package has changed
-          preStart = setupDB;
-        });
+          inherit preStart;
+        };
 
         systemd.services.paperless-server = {
           description = "Paperless document server";
