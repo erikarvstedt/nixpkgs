@@ -4523,6 +4523,18 @@ with pkgs;
 
   paperless = callPackage ../applications/office/paperless { };
 
+  paperless-django2 = paperless.override {
+    python3 = python3.override {
+      packageOverrides = self: super: { django = super.django_2_0; };
+    };
+  };
+
+  paperless-django2_1 = paperless.override {
+    python3 = python3.override {
+      packageOverrides = self: super: { django = super.django_2_1; };
+    };
+  };
+
   paperwork = callPackage ../applications/office/paperwork { };
 
   papertrail = callPackage ../tools/text/papertrail { };
