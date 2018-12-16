@@ -8,8 +8,8 @@
 #        fetching all available languages from the tessdata repo
 #
 # Output:
-#   eng = "05gvs5kmlmp9ncb3c044vfndl24p5f99k8yfy50aabwksl3575q7";
-#   fra = "0606cailv7ap80b9ix72h56lq2ipgk5fsf0f7m3yjcxl0hr5pinb";
+#   eng = "05gv...";
+#   fra = "0c60...";
 #   ...
 
 set -e
@@ -25,26 +25,20 @@ for arg in "$@"; do
 done
 
 if [[ $localLangs ]]; then
-    langCodesExpr='builtins.attrNames (builtins.removeAttrs tesseractLanguages [ "recurseForDerivations" "all" ])'
+  langCodes=$(nix eval --raw '(
+    with (import ../../../.. { config = {}; overlays = []; });
+    let
+      languages = (pkgs.callPackage ./languages.nix {}).v3;
+    in
+      builtins.concatStringsSep " " (lib.remove "all" (builtins.attrNames languages))
+  )')
 else
-    langCodes=$(echo $(curl -s https://github.com/tesseract-ocr/tessdata/tree/$tessdataRev \
-                       | grep -ohP "(?<=/)[^/]+?(?=\.traineddata)" | sort))
-    langCodesExpr="lib.splitString \" \" \"$langCodes\""
+  langCodes=$(echo $(curl -s https://github.com/tesseract-ocr/tessdata/tree/$tessdataRev \
+              | grep -ohP "(?<=/)[^/]+?(?=\.traineddata)" | sort))
 fi
 
-nixSrc=$(sed -e "s/TESSDATA_REV/$tessdataRev/" -e "s/LANGUAGE_CODES/$langCodesExpr/" <<'EOF'
-  with (import ../../../.. { config = {}; overlays = []; });
-  let
-    tessdataRev = "TESSDATA_REV";
-    languageCodes = LANGUAGE_CODES;
-    url = lang: "https://github.com/tesseract-ocr/tessdata/raw/${tessdataRev}/${lang}.traineddata";
-    commands = map (lang: ''
-      echo "${lang} = \"$(nix-prefetch-url ${url lang} 2>/dev/null)\";"
-    '') languageCodes;
-  in
-    builtins.concatStringsSep "\n" commands
-EOF
-)
-cmds=$(nix eval --raw "($nixSrc)")
-
-eval "$cmds"
+for lang in $langCodes; do
+    url=https://github.com/tesseract-ocr/tessdata/raw/$tessdataRev/$lang.traineddata
+    hash=$(nix-prefetch-url $url 2>/dev/null)
+    echo "$lang = \"$hash\";"
+done
