@@ -5,7 +5,7 @@
 # if you want just a specific list of languages, optionally specify a hash
 # to make tessdata a fixed output derivation.
 , enableLanguagesHash ? (if enableLanguages == null # all languages
-                         then "1h48xfzabhn0ldbx5ib67cp9607pr0zpblsy8z6fs4knn0zznfnw"
+                         then "11bi1hj2ihqrgvi9cam8mi70p4spm3syljkpnbglf4s8jkpfn15a"
                          else null)
 }:
 
@@ -20,11 +20,10 @@ let
       sha256 = "1v4b63v5nzcxr2y3635r19l7lj5smjmc9vfk0wmxlryxncb4vpg7";
     };
     buildCommand = ''
-      cd $src;
-      for lang in ${if enableLanguages==null then "*.traineddata"
-                    else stdenv.lib.concatMapStringsSep " " (x: x+".traineddata") enableLanguages}; do
-        install -Dt $out/share/tessdata $src/$lang;
-      done;
+      cd $src
+      langFiles="${if enableLanguages == null then "*.traineddata"
+                   else stdenv.lib.concatMapStringsSep " " (x: x + ".traineddata") enableLanguages}"
+      install -Dt $out $langFiles
     '';
     preferLocalBuild = true;
   } // (stdenv.lib.optionalAttrs (enableLanguagesHash != null) {
@@ -63,6 +62,8 @@ let
 
   tesseractWithData = tesseractWithoutData.overrideAttrs (_: {
     inherit tesseractWithoutData;
+
+    # tessdata can be a list of files or a directory containing files
     inherit tessdata;
 
     buildCommand = ''
@@ -76,9 +77,8 @@ let
       fi
       find $out -type f -exec sed -i "s|$tesseractWithoutData|$out|g" {} \;
 
-      for i in $tessdata/share/tessdata/*; do
-        ln -s $i $out/share/tessdata;
-      done
+      [[ -d "$tessdata" ]] && tessdata=$tessdata/*
+      ln -s $tessdata $out/share/tessdata
     '';
   });
 in
