@@ -4,9 +4,7 @@
 , enableLanguages ? null
 # if you want just a specific list of languages, optionally specify a hash
 # to make tessdata a fixed output derivation.
-, enableLanguagesHash ? (if enableLanguages == null # all languages
-                         then "11bi1hj2ihqrgvi9cam8mi70p4spm3syljkpnbglf4s8jkpfn15a"
-                         else null)
+, enableLanguagesHash ? null
 }:
 
 let
