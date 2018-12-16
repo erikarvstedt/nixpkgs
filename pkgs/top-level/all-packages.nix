@@ -19487,6 +19487,7 @@ in
 
   tesseract = callPackage ../applications/graphics/tesseract { };
   tesseractWithoutData = callPackage ../applications/graphics/tesseract { enableLanguages = false; };
+  tesseractLanguages = recurseIntoAttrs tesseract.languages;
   tesseract_4 = lowPrio (callPackage ../applications/graphics/tesseract/4.x.nix { });
 
   tetraproc = callPackage ../applications/audio/tetraproc { };
