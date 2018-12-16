@@ -11,6 +11,11 @@ read -d '' perlSrc <<'EOF'
 EOF
 
 (nix-build --no-out-link --keep-going -E '
- with (import ../../../.. { config = {}; overlays = []; });
-   tesseractLanguages
- ' 2>&1) | perl -ne "$perlSrc"
+with (import ../../../.. { config = {}; overlays = []; });
+let
+  fetchurlHashFail = { ... }@args:
+    fetchurl (args // { sha256 = "0000000000000000000000000000000000000000000000000000"; });
+  languages = callPackage ./languages.nix { fetchurl = fetchurlHashFail; };
+in
+  languages.v3
+' 2>&1) | perl -ne "$perlSrc"
