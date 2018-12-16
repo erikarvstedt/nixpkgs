@@ -8,7 +8,7 @@ let
   languages = (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3;
 
   tessdata = if enableLanguages == null then
-      builtins.attrValues languages
+      languages.all
     else
       map (lang: languages.${lang}) enableLanguages;
 

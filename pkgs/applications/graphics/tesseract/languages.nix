@@ -1,17 +1,38 @@
 { stdenv, fetchurl, fetchFromGitHub }:
 
 rec {
-  makeLanguages = { tessdataRev, languages ? {} }:
+  makeLanguages = { tessdataRev, tessdata ? null, all ? null, languages ? {} }:
     let
+      tessdataSrc = fetchFromGitHub {
+        owner = "tesseract-ocr";
+        repo = "tessdata";
+        rev = tessdataRev;
+        sha256 = tessdata;
+      };
+
       languageFile = lang: sha256: fetchurl {
         url = "https://github.com/tesseract-ocr/tessdata/raw/${tessdataRev}/${lang}.traineddata";
         inherit sha256;
       };
     in
-      builtins.mapAttrs languageFile languages;
+      {
+        all = stdenv.mkDerivation {
+          name = "all";
+          buildCommand = ''
+            mkdir $out
+            cd ${tessdataSrc}
+            cp *.traineddata $out
+          '';
+          outputHashMode = "recursive";
+          outputHashAlgo = "sha256";
+          outputHash = all;
+        };
+      } // (builtins.mapAttrs languageFile languages);
 
   v3 = makeLanguages {
     tessdataRev = "3cf1e2df1fe1d1da29295c9ef0983796c7958b7d";
+    tessdata = "1v4b63v5nzcxr2y3635r19l7lj5smjmc9vfk0wmxlryxncb4vpg7";
+    all = "0yj6h9n6h0kzzcqsn3z87vsi8pa60szp0yiayb0znd0v9my0dqhn";
 
     # Run `./get-language-hashes.sh <tessdataRev>` to generate these hashes
     languages = {
