@@ -33,8 +33,8 @@ let
     outputHashAlgo = "sha256";
     outputHash = enableLanguagesHash;
   }));
-in
-  stdenv.mkDerivation rec {
+
+  tesseractWithoutData = stdenv.mkDerivation rec {
     name = "tesseract-${version}";
     version = "3.05.00";
 
@@ -52,12 +52,6 @@ in
 
     LIBLEPT_HEADERSDIR = "${leptonica}/include";
 
-    postInstall = ''
-      for i in ${tessdata}/share/tessdata/*; do
-        ln -s $i $out/share/tessdata;
-      done
-    '';
-
     meta = {
       description = "OCR engine";
       homepage = https://github.com/tesseract-ocr/tesseract;
@@ -65,4 +59,30 @@ in
       maintainers = with stdenv.lib.maintainers; [viric];
       platforms = with stdenv.lib.platforms; linux ++ darwin;
     };
-  }
+  };
+
+  tesseractWithData = tesseractWithoutData.overrideAttrs (_: {
+    inherit tesseractWithoutData;
+    inherit tessdata;
+
+    buildCommand = ''
+      cp -r $tesseractWithoutData $out
+      chmod -R +w $out
+
+      # Switch all store paths pointing to the original derivation to this derivation
+      if (( ''${#tesseractWithoutData} != ''${#out} )); then
+        echo "Can't replace store paths due to differing lengths"
+        exit 1
+      fi
+      find $out -type f -exec sed -i "s|$tesseractWithoutData|$out|g" {} \;
+
+      for i in $tessdata/share/tessdata/*; do
+        ln -s $i $out/share/tessdata;
+      done
+    '';
+  });
+in
+  if enableLanguages == false then
+    tesseractWithoutData
+  else
+    tesseractWithData
