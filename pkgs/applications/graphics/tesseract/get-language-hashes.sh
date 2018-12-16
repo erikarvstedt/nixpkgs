@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   ./get-language-hashes.sh [<tessdataRev>]
+#   ./get-language-hashes.sh [--local-langs] [<tessdataRev>]
+#
+#   --local-langs
+#        Only use languages already defined in ./languages.nix instead of
+#        fetching all available languages from the tessdata repo
 #
 # Output:
 #   eng = "05gvs5kmlmp9ncb3c044vfndl24p5f99k8yfy50aabwksl3575q7";
@@ -10,14 +14,29 @@
 
 set -e
 
-tessdataRev=${1:-3cf1e2df1fe1d1da29295c9ef0983796c7958b7d}
+tessdataRev=3cf1e2df1fe1d1da29295c9ef0983796c7958b7d
 
-nixSrc=$(sed "s/TESSDATA_REV/$tessdataRev/" <<'EOF'
+for arg in "$@"; do
+    if [[ $arg == --local-langs ]]; then
+        localLangs=1
+    else
+        tessdataRev=$arg
+    fi
+done
+
+if [[ $localLangs ]]; then
+    langCodesExpr='builtins.attrNames (builtins.removeAttrs tesseractLanguages [ "recurseForDerivations" "all" ])'
+else
+    langCodes=$(echo $(curl -s https://github.com/tesseract-ocr/tessdata/tree/$tessdataRev \
+                       | grep -ohP "(?<=/)[^/]+?(?=\.traineddata)" | sort))
+    langCodesExpr="lib.splitString \" \" \"$langCodes\""
+fi
+
+nixSrc=$(sed -e "s/TESSDATA_REV/$tessdataRev/" -e "s/LANGUAGE_CODES/$langCodesExpr/" <<'EOF'
   with (import ../../../.. { config = {}; overlays = []; });
   let
     tessdataRev = "TESSDATA_REV";
-    languageCodes = builtins.attrNames
-                      (builtins.removeAttrs tesseractLanguages [ "recurseForDerivations" "all" ]);
+    languageCodes = LANGUAGE_CODES;
     url = lang: "https://github.com/tesseract-ocr/tessdata/raw/${tessdataRev}/${lang}.traineddata";
     commands = map (lang: ''
       echo "${lang} = \"$(nix-prefetch-url ${url lang} 2>/dev/null)\";"

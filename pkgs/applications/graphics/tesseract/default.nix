@@ -2,35 +2,15 @@
 , leptonica, libpng, libtiff, icu, pango, opencl-headers
 # Supported list of languages or `null' for all available languages
 , enableLanguages ? null
-# if you want just a specific list of languages, optionally specify a hash
-# to make tessdata a fixed output derivation.
-, enableLanguagesHash ? null
 }:
 
 let
   languages = (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3;
 
   tessdata = if enableLanguages == null then
-      languages.all
+      builtins.attrValues languages
     else
-      if builtins.all (lang: builtins.hasAttr lang languages) enableLanguages then
-        map (lang: languages.${lang}) enableLanguages
-      else
-        # Copy the selected languages from languages.all
-        stdenv.mkDerivation ({
-          name = "tessdata";
-          buildCommand = ''
-            mkdir $out
-            cd ${languages.all}
-            cp ${stdenv.lib.concatMapStringsSep " " (x: x + ".traineddata") enableLanguages} $out
-          '';
-          preferLocalBuild = true;
-        } // (stdenv.lib.optionalAttrs (enableLanguagesHash != null) {
-          # when a hash is given, we make this a fixed output derivation.
-          outputHashMode = "recursive";
-          outputHashAlgo = "sha256";
-          outputHash = enableLanguagesHash;
-        }));
+      map (lang: languages.${lang}) enableLanguages;
 
   tesseractWithoutData = stdenv.mkDerivation rec {
     name = "tesseract-${version}";
@@ -78,8 +58,13 @@ let
       fi
       find $out -type f -exec sed -i "s|$tesseractWithoutData|$out|g" {} \;
 
-      [[ -d "$tessdata" ]] && tessdata=$tessdata/*
-      ln -s $tessdata $out/share/tessdata
+      if [[ -d "$tessdata" ]]; then
+        ln -s $tessdata/* $out/share/tessdata
+      else
+        for lang in $tessdata; do
+          ln -s $lang $out/share/tessdata/''${lang#/nix/store*-}
+        done
+      fi
     '';
   });
 in
