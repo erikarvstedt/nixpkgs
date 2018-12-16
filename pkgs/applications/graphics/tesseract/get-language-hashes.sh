@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
 
+# Usage:
+#   ./get-language-hashes.sh [<tessdataRev>]
+#
 # Output:
 #   eng = "05gvs5kmlmp9ncb3c044vfndl24p5f99k8yfy50aabwksl3575q7";
 #   fra = "0606cailv7ap80b9ix72h56lq2ipgk5fsf0f7m3yjcxl0hr5pinb";
 #   ...
-# for all languages where the actual sha256 doesn't match the expected hash
 
-read -d '' perlSrc <<'EOF'
-  print "$1 = \\"$2\\";\\n" if m|-(\\S*?)\\.traineddata' with sha256 hash '(.*?)'|
+set -e
+
+tessdataRev=${1:-3cf1e2df1fe1d1da29295c9ef0983796c7958b7d}
+
+nixSrc=$(sed "s/TESSDATA_REV/$tessdataRev/" <<'EOF'
+  with (import ../../../.. { config = {}; overlays = []; });
+  let
+    tessdataRev = "TESSDATA_REV";
+    languageCodes = builtins.attrNames
+                      (builtins.removeAttrs tesseractLanguages [ "recurseForDerivations" "all" ]);
+    url = lang: "https://github.com/tesseract-ocr/tessdata/raw/${tessdataRev}/${lang}.traineddata";
+    commands = map (lang: ''
+      echo "${lang} = \"$(nix-prefetch-url ${url lang} 2>/dev/null)\";"
+    '') languageCodes;
+  in
+    builtins.concatStringsSep "\n" commands
 EOF
+)
+cmds=$(nix eval --raw "($nixSrc)")
 
-(nix-build --no-out-link --keep-going -E '
-with (import ../../../.. { config = {}; overlays = []; });
-let
-  fetchurlHashFail = { ... }@args:
-    fetchurl (args // { sha256 = "0000000000000000000000000000000000000000000000000000"; });
-  languages = callPackage ./languages.nix { fetchurl = fetchurlHashFail; };
-in
-  languages.v3
-' 2>&1) | perl -ne "$perlSrc"
+eval "$cmds"
