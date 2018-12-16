@@ -11,7 +11,7 @@ rec {
       };
 
       languageFile = lang: sha256: fetchurl {
-        url = "https://github.com/tesseract-ocr/tessdata/blob/${tessdataRev}/${lang}.traineddata";
+        url = "https://github.com/tesseract-ocr/tessdata/raw/${tessdataRev}/${lang}.traineddata";
         inherit sha256;
       };
     in
@@ -36,33 +36,33 @@ rec {
 
     # Use the helper script ./get-language-hashes.sh to generate these hashes
     languages = {
-      ara = "089ayqxr3qqfa9vy2llmhp5vycjhafakghn3nlhdd2rf65vkbwvh";
-      ben = "1q98z1p7h66fll5js0x3dlbm03chhlsn1929jcbb2ypyiq4n1lzz";
-      ces = "1lf01q7p6pvbf5k0iwhxz8k99rqhvbsjgmwslir9ab4d6j9483f8";
-      dan = "0r46z6mnmcc3vhd8gdlw1w8bpyrw30zgp5qmdk58h32cib175bd8";
-      deu = "1fqma46himg9yp4hkqcixwsbxqahr57wc86xcd7wx29xyizbm472";
-      chi_sim = "1g2izs7h0h6n5sy7dccpyd0ykqcfmpjkssgfa1i78pj28cd440i8";
-      chi_tra = "1zi54l0l5yj3n9r0fqdpf9ym7fsykqf432pdi726f7m9dyyblg9h";
-      eng = "1h1zlg627wa15s1s7i7zk53v3ycq6b8x50ainvb56d0xjdm6d9ma";
-      fin = "18zgfc8l9yn8vg726np5ls2k2npf6b19130s7ycjl5ksbiynwm1z";
-      fra = "0wbkkxs129vyh516c8wm5wqpgfmfxlcpydip8nbrnlk70fj5ph6x";
-      heb = "0rfp7incl5f0r92g1h1cqpxr898vxkyfprh9gh8mikwr0a16iq1b";
-      hrv = "0k9j6fwbhpwbvz8kfg4s0h7dymagqcikxll9cw3v1in4qqpvyrv6";
-      guj = "01l89b63rp1vyrlm3mn9lmhq4d29s0jf7gnl0ihfhcs53bqapazh";
-      hun = "1jsq2zi6awchf03x1186zy0rbzr1dizjn2gga17s666qf07vsi8m";
-      ita = "1cg1i9d6dx507gd15zz1c8b04p53v6vr2annlcznfznzjzymk2p4";
-      jpn = "00zig78861j8pgfnlwnli7shpak3ywqld48w5cx6mi9bcj5d3vb2";
-      nld = "039m7jjadvn2xs8iwq21f9pxz87lcjfm56l3jvq8kv44x6jm3r2j";
-      pan = "0331flxkdxmi3x4dw53l61wxl3fa1hab9fdfckn201bzzvs0ydiz";
-      nor = "16800lahfvj287pfxx65z2gnjfm604s118rdxca894n9dl86w78f";
-      pol = "00nmgirvgw30wqhk70d048v08wsc1kp03w9hxsj6rbl45gklhlna";
-      ron = "1brpab2bms7yf7is9rjwz9bhw4mlvlpv5mg8gl4mwayl1myr45hm";
-      por = "1fy774ahjsnm0kaq70wsyf7x8gz0gm6slan9swb66s9ph0n5d3kc";
-      spa = "07zbywq3mf1yaypnqfk894k2lmhgn9bxc9g6lhligdgwclhh3a3r";
-      swe = "1gywdl0dfc6rlyfj9mlpxxi08n9rdlxn9alh4bp2d6dd5gf5fcc0";
-      rus = "0bw41d92aj9slnz4713xcgjcwg16dcpyp8ny725nbfj5rl7qvbdz";
-      ukr = "007mnyi05myjbx7m4fzvzh3jy1mcy9ac8h2n9cpvwvz03ikhw6rc";
-      tur = "0m76w3bz8rkmz0z02szl34wjwv0p8d0s12ri5ax7j7lcb90jg4rj";
+      ara = "0nk495gki6jbbnwcl2ybsx4nd02d6qykcjncq0d2g8pbgapqmj91";
+      ben = "0q7812kn5xjm47hcgdcg911lhbgqr7hbvqckfxxm8qw0yjx2cy0m";
+      ces = "0zxkkyhpd74i6321nv86pkjb0k7p9cp6m174rbn42nl7jz6qxib0";
+      chi_sim = "0k250xr0gk9yh22yqxd0zpxdsrqfzs164kdv5n9rxx1g996yffij";
+      chi_tra = "03nxqpd546p0gwfj6pqzbdbv5zjpdddzlpa10xn4nvmks1mmckbp";
+      dan = "1s1yj56rpzmif3ir3qs4iab744cgpflk7y8812z2665bh61illpr";
+      deu = "0fna7fqk1a8ivd7q2k38vx37qm3vbn183zh4z5zfqb4pgqmb8znb";
+      eng = "0vghah8kqcv0n5fnjb88w6siz156ysrc41fckw3f2y8c3sgmqlf0";
+      fin = "1wac333k0lcd5jwprzg99b10bq8sdc96b9d6275kg9imyqjwcc7q";
+      fra = "1ax7i0nw1lwkz4sbrvn4z0lcrcai77ymdpla7qk7yij6s4xb5bw6";
+      guj = "0dp8mlxmf0x9wb8dg0c508sdwz03icq94z8ji8jhwgdqgv8hw1al";
+      heb = "16za9ff1i3ya6hz75l9v3v7j4039kscxxw21g3i2w5p9zn52hyag";
+      hrv = "15rqd6xiv2bdmalb5s6rxvw0yk6w9agn9fli3bvi703q6vpj2yn3";
+      hun = "19zzwdxwi3h3vdsgr271i1m87gfpdirk6b1ljw2j8qmfilp4sw56";
+      ita = "1lxklk3zc3x3k8yfpp6ygyv7fndgs57dfasc97rh8782ds16wkjs";
+      jpn = "1wmayj8wh3pfwznjhalad2qzv38mhrzw2sxl71mycvzvpdy9ag1w";
+      nld = "1clwbky71zkz55zd3f8r9hj8fhpnbkply80p1js4fvs7x12r715x";
+      nor = "1ynvrz6s0vmlq1xkjd8k2w6bx8770x6v29qgx83d4nl17ngjd459";
+      pan = "1fwdpwkydfmr6drwgkqzn89z12r2rdm02a75vvdxhxg2a9yiwmbv";
+      pol = "155z870ygzws476kp7qpzi8jcjcv3jb5px8rbzhnag1fklqr48hx";
+      por = "1814cff2rffpzlg4hyyrjzpf5ps2i95rmpa4c8ikblbvrlcv97q8";
+      ron = "11lr80zhvnnngvwwk01z1d3prfpbh3qbwpl1nl5fp7h09d6n3wzl";
+      rus = "1d6a8lg4bmd3np16jds1py3qpkaq4ahnhwghd5r0159y0jpxq00q";
+      spa = "1npgl8ylvfm60hd4214z8a3lriy1hckhijschrbjpzmwdfcqafgj";
+      swe = "0l10iyn2cr7ibgk0akmpg8725mpwpydawgv3s77izsw7y6xhfr1a";
+      tur = "0xqnq99b2jb4v74bj95py6wmg14dm31zp5s3l48dmcv6zdgcxg2w";
+      ukr = "0cdwjnfnnmzz7jdn49l96vqgaimclfxcxaw09cm63f5my382r2rg";
     };
   };
 }
