@@ -70,7 +70,7 @@ let
     '';
   });
 
-  tesseract = if enableLanguages == false then
+  tesseract = if enableLanguages == [] then
     tesseractWithoutData
   else
     tesseractWithData;
