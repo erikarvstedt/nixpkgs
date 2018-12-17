@@ -19486,7 +19486,6 @@ in
   termtosvg = callPackage ../tools/misc/termtosvg { };
 
   tesseract = callPackage ../applications/graphics/tesseract { };
-  tesseractWithoutData = callPackage ../applications/graphics/tesseract { enableLanguages = []; };
   tesseract_4 = lowPrio (callPackage ../applications/graphics/tesseract/4.x.nix { });
 
   tetraproc = callPackage ../applications/audio/tetraproc { };

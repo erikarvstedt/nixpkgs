@@ -49,6 +49,10 @@ let
     # tessdata can be a list of files or a directory containing files
     inherit tessdata;
 
+    # Use an extra output to force Hydra to store `tesseractWithoutData`, which is
+    # needed for Tesseract builds with custom langauges.
+    outputs = [ "out" "storeInHydra" ];
+
     buildCommand = ''
       cp -r $tesseractWithoutData $out
       chmod -R +w $out
@@ -67,6 +71,8 @@ let
           ln -s $lang $out/share/tessdata/''${lang#/nix/store*-}
         done
       fi
+
+      ln -s $tesseractWithoutData $storeInHydra
     '';
   });
 
