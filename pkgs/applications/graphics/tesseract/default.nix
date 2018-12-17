@@ -48,20 +48,19 @@ let
     # tessdata can be a list of files or a directory containing files
     inherit tessdata;
 
-    # Use an extra output to force Hydra to store `tesseractBase`, which is
-    # needed for Tesseract builds with custom langauges.
-    outputs = [ "out" "storeInHydra" ];
-
     buildCommand = ''
-      cp -r $tesseractBase $out
+      mkdir $out
+      cp -r $tesseractBase/{bin,lib} $out
       chmod -R +w $out
+      cp -rs --no-preserve=mode $tesseractBase/{include,share} $out
 
-      # Switch all store paths pointing to the original derivation to this derivation
+      # The store paths in bin and lib still point to `tesseractBase`.
+      # Switch them to this derivation so that the correct tessdata is used.
       if (( ''${#tesseractBase} != ''${#out} )); then
         echo "Can't replace store paths due to differing lengths"
         exit 1
       fi
-      find $out -type f -exec sed -i "s|$tesseractBase|$out|g" {} \;
+      find $out/{bin,lib} -type f -exec sed -i "s|$tesseractBase|$out|g" {} \;
 
       if [[ -d "$tessdata" ]]; then
         ln -s $tessdata/* $out/share/tessdata
@@ -70,8 +69,6 @@ let
           ln -s $lang $out/share/tessdata/''${lang#/nix/store*-}
         done
       fi
-
-      ln -s $tesseractBase $storeInHydra
     '';
   });
 
