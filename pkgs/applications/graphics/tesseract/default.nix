@@ -2,6 +2,8 @@
 , leptonica, libpng, libtiff, icu, pango, opencl-headers
 # Supported list of languages or `null' for all available languages
 , enableLanguages ? null
+# This argument is obsolete
+, enableLanguagesHash ? null
 }:
 
 let
@@ -67,8 +69,14 @@ let
       fi
     '';
   });
-in
-  if enableLanguages == false then
+
+  tesseract = if enableLanguages == false then
     tesseractWithoutData
   else
-    tesseractWithData
+    tesseractWithData;
+in
+  if enableLanguagesHash == null then
+    tesseract
+  else
+    builtins.trace "Argument `enableLanguagesHash` is obsolete and can be removed."
+    tesseract
