@@ -1,20 +1,9 @@
 { stdenv, fetchurl, fetchFromGitHub, autoreconfHook, pkgconfig
 , leptonica, libpng, libtiff, icu, pango, opencl-headers
-# Supported list of languages or `null' for all available languages
+# List of languages like [ "eng" "spa" ... ] or `null` for all available languages
 , enableLanguages ? null
-# This argument is obsolete
-, enableLanguagesHash ? null
-}:
 
-let
-  languages = (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3;
-
-  tessdata = if enableLanguages == null then
-      languages.all
-    else
-      map (lang: languages.${lang}) enableLanguages;
-
-  tesseractBase = stdenv.mkDerivation rec {
+, tesseractBase ? stdenv.mkDerivation rec {
     name = "tesseract-${version}";
     version = "3.05.00";
 
@@ -32,8 +21,6 @@ let
 
     LIBLEPT_HEADERSDIR = "${leptonica}/include";
 
-    passthru = { inherit languages; };
-
     meta = {
       description = "OCR engine";
       homepage = https://github.com/tesseract-ocr/tesseract;
@@ -41,7 +28,19 @@ let
       maintainers = with stdenv.lib.maintainers; [ viric earvstedt ];
       platforms = with stdenv.lib.platforms; linux ++ darwin;
     };
-  };
+  }
+
+# This argument is obsolete
+, enableLanguagesHash ? null
+}:
+
+let
+  languages = (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3;
+
+  tessdata = if enableLanguages == null then
+      languages.all
+    else
+      map (lang: languages.${lang}) enableLanguages;
 
   tesseractWithData = tesseractBase.overrideAttrs (_: {
     inherit tesseractBase;
@@ -76,13 +75,12 @@ let
     '';
   });
 
-  tesseract = if enableLanguages == [] then
-    tesseractBase
-  else
-    tesseractWithData;
+  tesseract = (if enableLanguages == [] then tesseractBase else tesseractWithData) // {
+    inherit languages tesseractBase;
+  };
 in
   if enableLanguagesHash == null then
     tesseract
   else
-    builtins.trace "Argument `enableLanguagesHash` is obsolete and can be removed."
+    stdenv.lib.warn "Argument `enableLanguagesHash` is obsolete and can be removed."
     tesseract
