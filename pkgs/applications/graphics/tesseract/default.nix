@@ -14,7 +14,7 @@ let
     else
       map (lang: languages.${lang}) enableLanguages;
 
-  tesseractWithoutData = stdenv.mkDerivation rec {
+  tesseractBase = stdenv.mkDerivation rec {
     name = "tesseract-${version}";
     version = "3.05.00";
 
@@ -43,26 +43,26 @@ let
     };
   };
 
-  tesseractWithData = tesseractWithoutData.overrideAttrs (_: {
-    inherit tesseractWithoutData;
+  tesseractWithData = tesseractBase.overrideAttrs (_: {
+    inherit tesseractBase;
 
     # tessdata can be a list of files or a directory containing files
     inherit tessdata;
 
-    # Use an extra output to force Hydra to store `tesseractWithoutData`, which is
+    # Use an extra output to force Hydra to store `tesseractBase`, which is
     # needed for Tesseract builds with custom langauges.
     outputs = [ "out" "storeInHydra" ];
 
     buildCommand = ''
-      cp -r $tesseractWithoutData $out
+      cp -r $tesseractBase $out
       chmod -R +w $out
 
       # Switch all store paths pointing to the original derivation to this derivation
-      if (( ''${#tesseractWithoutData} != ''${#out} )); then
+      if (( ''${#tesseractBase} != ''${#out} )); then
         echo "Can't replace store paths due to differing lengths"
         exit 1
       fi
-      find $out -type f -exec sed -i "s|$tesseractWithoutData|$out|g" {} \;
+      find $out -type f -exec sed -i "s|$tesseractBase|$out|g" {} \;
 
       if [[ -d "$tessdata" ]]; then
         ln -s $tessdata/* $out/share/tessdata
@@ -72,12 +72,12 @@ let
         done
       fi
 
-      ln -s $tesseractWithoutData $storeInHydra
+      ln -s $tesseractBase $storeInHydra
     '';
   });
 
   tesseract = if enableLanguages == [] then
-    tesseractWithoutData
+    tesseractBase
   else
     tesseractWithData;
 in
