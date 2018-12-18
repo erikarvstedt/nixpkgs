@@ -1,5 +1,6 @@
 { stdenv, fetchurl, fetchFromGitHub, autoreconfHook, pkgconfig
 , leptonica, libpng, libtiff, icu, pango, opencl-headers
+
 # List of languages like [ "eng" "spa" ... ] or `null` for all available languages
 , enableLanguages ? null
 
@@ -30,23 +31,19 @@
     };
   }
 
+# A list of files or a directory containing files
+, tessdata ? (if enableLanguages == null then languages.all
+              else map (lang: languages.${lang}) enableLanguages)
+
+, languages ? (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3
+
 # This argument is obsolete
 , enableLanguagesHash ? null
 }:
 
 let
-  languages = (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3;
-
-  tessdata = if enableLanguages == null then
-      languages.all
-    else
-      map (lang: languages.${lang}) enableLanguages;
-
   tesseractWithData = tesseractBase.overrideAttrs (_: {
-    inherit tesseractBase;
-
-    # tessdata can be a list of files or a directory containing files
-    inherit tessdata;
+    inherit tesseractBase tessdata;
 
     buildCommand = ''
       mkdir $out
@@ -73,7 +70,7 @@ let
   });
 
   tesseract = (if enableLanguages == [] then tesseractBase else tesseractWithData) // {
-    inherit languages tesseractBase;
+    inherit tesseractBase languages tessdata;
   };
 in
   if enableLanguagesHash == null then
