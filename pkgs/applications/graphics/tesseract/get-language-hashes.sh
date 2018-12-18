@@ -7,9 +7,8 @@
 #   ./get-language-hashes.sh 4.0.0 eng spa
 #
 #   Output:
-#     eng = "05gv...";
-#     spa = "0c60...";
-#    ...
+#     eng = "0iy0...";
+#     spa = "15kw...";
 
 set -e
 
