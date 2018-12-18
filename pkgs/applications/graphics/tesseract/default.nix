@@ -42,6 +42,8 @@
 }:
 
 let
+  passthru = { inherit tesseractBase tesseractLanguages tessdata; };
+
   tesseractWithData = tesseractBase.overrideAttrs (_: {
     inherit tesseractBase tessdata;
 
@@ -69,9 +71,7 @@ let
     '';
   });
 
-  tesseract = (if enableLanguages == [] then tesseractBase else tesseractWithData) // {
-    inherit tesseractBase tesseractLanguages tessdata;
-  };
+  tesseract = (if enableLanguages == [] then tesseractBase else tesseractWithData) // passthru;
 in
   if enableLanguagesHash == null then
     tesseract
