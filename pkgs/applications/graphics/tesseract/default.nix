@@ -32,10 +32,10 @@
   }
 
 # A list of files or a directory containing files
-, tessdata ? (if enableLanguages == null then languages.all
-              else map (lang: languages.${lang}) enableLanguages)
+, tessdata ? (if enableLanguages == null then tesseractLanguages.all
+              else map (lang: tesseractLanguages.${lang}) enableLanguages)
 
-, languages ? (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3
+, tesseractLanguages ? (import ./languages.nix { inherit stdenv fetchurl fetchFromGitHub; }).v3
 
 # This argument is obsolete
 , enableLanguagesHash ? null
@@ -70,7 +70,7 @@ let
   });
 
   tesseract = (if enableLanguages == [] then tesseractBase else tesseractWithData) // {
-    inherit tesseractBase languages tessdata;
+    inherit tesseractBase tesseractLanguages tessdata;
   };
 in
   if enableLanguagesHash == null then
