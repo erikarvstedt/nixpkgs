@@ -1,7 +1,7 @@
 { stdenv, fetchurl, fetchFromGitHub, autoreconfHook, pkgconfig
 , leptonica, libpng, libtiff, icu, pango, opencl-headers
 
-# List of languages like [ "eng" "spa" ... ] or `null` for all available languages
+# List of languages like [ "eng" "spa" … ] or `null` for all available languages
 , enableLanguages ? null
 
 , tesseractBase ? stdenv.mkDerivation rec {

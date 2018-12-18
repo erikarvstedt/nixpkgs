@@ -16,6 +16,7 @@ rec {
       };
     in
       {
+        # Use a simple fixed-output derivation for all languages to increase nix eval performance
         all = stdenv.mkDerivation {
           name = "all";
           buildCommand = ''
