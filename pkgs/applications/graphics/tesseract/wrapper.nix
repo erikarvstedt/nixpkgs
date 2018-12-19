@@ -1,4 +1,4 @@
-{ stdenv, tesseractBase, languages
+{ stdenv, makeWrapper, tesseractBase, languages
 
 # A list of languages like [ "eng" "spa" … ] or `null` for all available languages
 , enableLanguages ? null
@@ -17,19 +17,22 @@ let
   tesseractWithData = tesseractBase.overrideAttrs (_: {
     inherit tesseractBase tessdata;
 
+    buildInputs = [ makeWrapper ];
+
     buildCommand = ''
-      mkdir $out
-      cp -r $tesseractBase/{bin,lib} $out
-      chmod -R +w $out
+      makeWrapper {$tesseractBase,$out}/bin/tesseract --set-default TESSDATA_PREFIX $out/share
+
+      # Recursively link include, share
       cp -rs --no-preserve=mode $tesseractBase/{include,share} $out
 
-      # The store paths in bin and lib still point to `tesseractBase`.
+      cp -r --no-preserve=mode $tesseractBase/lib $out
+      # The store paths in lib still point to `tesseractBase`.
       # Switch them to this derivation so that the correct tessdata is used.
       if (( ''${#tesseractBase} != ''${#out} )); then
         echo "Can't replace store paths due to differing lengths"
         exit 1
       fi
-      find $out/{bin,lib} -type f -exec sed -i "s|$tesseractBase|$out|g" {} \;
+      find $out/lib -type f -exec sed -i "s|$tesseractBase|$out|g" {} \;
 
       if [[ -d "$tessdata" ]]; then
         ln -s $tessdata/* $out/share/tessdata
