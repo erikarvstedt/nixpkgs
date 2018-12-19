@@ -6,7 +6,9 @@ let
   languages = callPackage ./languages.nix {};
 in
 {
-  tesseract = callPackage ./wrapper.nix {
+  tesseract = tesseract3;
+
+  tesseract3 = callPackage ./wrapper.nix {
     tesseractBase = tesseract3;
     languages = languages.v3;
   };

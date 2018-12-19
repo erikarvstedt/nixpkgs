@@ -19487,6 +19487,7 @@ in
 
   inherit (callPackage ../applications/graphics/tesseract {})
     tesseract
+    tesseract3
     tesseract4;
 
   tetraproc = callPackage ../applications/audio/tetraproc { };
