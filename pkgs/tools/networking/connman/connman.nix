@@ -3,50 +3,24 @@
 , pkgconfig
 , file
 , glib
-# always required runtime dependencies
 , dbus
 , libmnl
 , gnutls
 , readline
-# configureable options
+
+# these features are enabled by default
+, openconnect ? null
+, openvpn ? null
+, vpnc ? true
+, polkit ? null
+, pptp ? null
+, ppp ? null
+
+# configurable options
 , firewallType ? "iptables" # or "nftables"
 , iptables ? null
 , libnftnl ? null # for nftables
 , dnsType ? "internal" # or "systemd-resolved"
-# optional features which are turned *on* by default
-, enableOpenconnect ? true
-, openconnect ? null
-, enableOpenvpn ? true
-, openvpn ? null
-, enableVpnc ? true
-, vpnc ? true
-, enablePolkit ? true
-, polkit ? null
-, enablePptp ? true
-, pptp ? null
-, ppp ? null
-, enableLoopback ? true
-, enableEthernet ? true
-, enableWireguard ? true
-, enableGadget ? true
-, enableWifi ? true
-, enableBluetooth ? true
-, enableOfono ? true
-, enableDundee ? true
-, enablePacrunner ? true
-, enableNeard ? true
-, enableWispr ? true
-, enableTools ? true
-, enableStats ? true
-, enableClient ? true
-, enableDatafiles ? true
-# optional features which are turned *off* by default
-, enableNetworkManager ? false
-, networkmanager ? null
-, enableHh2serialGps ? false
-, enableL2tp ? false
-, enableIospm ? false
-, enableTist ? false
 }:
 
 assert stdenv.lib.asserts.assertOneOf "firewallType" firewallType [ "iptables" "nftables" ];
@@ -68,28 +42,25 @@ stdenv.mkDerivation rec {
     libmnl
     gnutls
     readline
-  ];
+    (if (firewallType == "iptables") then iptables else libnftnl)
+  ]
+    ++ optionals (openvpn != null) [ openvpn ]
+    ++ optionals (openconnect != null) [ openconnect ]
+    ++ optionals (vpnc != null) [ vpnc ]
+    ++ optionals (polkit != null) [ polkit ]
+    ++ optionals (pptp != null) [ pptp ppp ]
+  ;
 
   nativeBuildInputs = [
     pkgconfig
     file
-  ]
-    ++ optionals (enableOpenvpn) [ openvpn ]
-    ++ optionals (enableOpenconnect) [ openconnect ]
-    ++ optionals (enableVpnc) [ vpnc ]
-    ++ optionals (enablePolkit) [ polkit ]
-    ++ optionals (enablePptp) [ pptp ppp ]
-    ++ optionals (firewallType == "iptables") [ iptables ]
-    ++ optionals (firewallType == "nftables") [ libnftnl ]
-  ;
+  ];
 
-  # fix invalid path to 'file'
   postPatch = ''
     sed -i "s/\/usr\/bin\/file/file/g" ./configure
   '';
 
   configureFlags = [
-    # directories flags
     "--sysconfdir=${placeholder "out"}/etc"
     "--localstatedir=/var"
     "--with-dbusconfdir=${placeholder "out"}/share"
@@ -98,68 +69,34 @@ stdenv.mkDerivation rec {
     "--with-systemdunitdir=${placeholder "out"}/lib/systemd/system"
     "--with-dns-backend=${dnsType}"
     "--with-firewall=${firewallType}"
-    # production build flags
+    "--enable-iwd"
+
+    # release build flags
     "--disable-maintainer-mode"
     "--enable-session-policy-local=builtin"
+
     # for building and running tests
     # "--enable-tests" # installs the tests, we don't want that
     "--enable-tools"
   ]
-    ++ optionals (!enableLoopback) [ "--disable-loopback" ]
-    ++ optionals (!enableEthernet) [ "--disable-ethernet" ]
-    ++ optionals (!enableWireguard) [ "--disable-wireguard" ]
-    ++ optionals (!enableGadget) [ "--disable-gadget" ]
-    ++ optionals (!enableWifi) [ "--disable-wifi" ]
-    # enable IWD support for wifi as it doesn't require any new dependencies
-    # and it's easier for the NixOS module to use only one connman package when
-    # IWD is requested
-    ++ optionals (enableWifi) [ "--enable-iwd" ]
-    ++ optionals (!enableBluetooth) [ "--disable-bluetooth" ]
-    ++ optionals (!enableOfono) [ "--disable-ofono" ]
-    ++ optionals (!enableDundee) [ "--disable-dundee" ]
-    ++ optionals (!enablePacrunner) [ "--disable-pacrunner" ]
-    ++ optionals (!enableNeard) [ "--disable-neard" ]
-    ++ optionals (!enableWispr) [ "--disable-wispr" ]
-    ++ optionals (!enableTools) [ "--disable-tools" ]
-    ++ optionals (!enableStats) [ "--disable-stats" ]
-    ++ optionals (!enableClient) [ "--disable-client" ]
-    ++ optionals (!enableDatafiles) [ "--disable-datafiles" ]
-    ++ optionals (enableOpenconnect) [
+    ++ optionals (openconnect != null) [
       "--enable-openconnect=builtin"
       "--with-openconnect=${openconnect}/sbin/openconnect"
     ]
-    ++ optionals (enableOpenvpn) [
+    ++ optionals (openvpn != null) [
       "--enable-openvpn=builtin"
       "--with-openvpn=${openvpn}/sbin/openvpn"
     ]
-    ++ optionals (enableVpnc) [
+    ++ optionals (vpnc != null) [
       "--enable-vpnc=builtin"
       "--with-vpnc=${vpnc}/sbin/vpnc"
     ]
-    ++ optionals (enablePolkit) [
+    ++ optionals (polkit != null) [
       "--enable-polkit"
     ]
-    ++ optionals (enablePptp) [
+    ++ optionals (pptp != null) [
       "--enable-pptp"
       "--with-pptp=${pptp}/sbin/pptp"
-    ]
-    ++ optionals (!enableWireguard) [
-      "--disable-wireguard"
-    ]
-    ++ optionals (enableNetworkManager) [
-      "--enable-nmcompat"
-    ]
-    ++ optionals (enableHh2serialGps) [
-      "--enable-hh2serial-gps"
-    ]
-    ++ optionals (enableL2tp) [
-      "--enable-l2tp"
-    ]
-    ++ optionals (enableIospm) [
-      "--enable-iospm"
-    ]
-    ++ optionals (enableTist) [
-      "--enable-tist"
     ]
   ;
 
