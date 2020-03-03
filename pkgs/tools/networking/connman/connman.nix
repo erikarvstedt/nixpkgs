@@ -44,11 +44,7 @@ stdenv.mkDerivation rec {
     readline
     (if (firewallType == "iptables") then iptables else libnftnl)
   ]
-    ++ optionals (openvpn != null) [ openvpn ]
-    ++ optionals (openconnect != null) [ openconnect ]
-    ++ optionals (vpnc != null) [ vpnc ]
-    ++ optionals (polkit != null) [ polkit ]
-    ++ optionals (pptp != null) [ pptp ppp ]
+    ++ optionals (pptp != null) [ ppp ]
   ;
 
   nativeBuildInputs = [
