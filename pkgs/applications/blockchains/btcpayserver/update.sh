@@ -2,5 +2,9 @@
 set -euo pipefail
 
 scriptDir=$(cd "${BASH_SOURCE[0]%/*}" && pwd)
+cd "$scriptDir"
 
-"$scriptDir"/../nbxplorer/util/update-common.sh btcpayserver "$scriptDir"/deps.nix
+echo "Updating nbxplorer"
+../nbxplorer/update.sh
+echo "Updating btcpayserver"
+../nbxplorer/util/update-common.sh btcpayserver deps.nix
