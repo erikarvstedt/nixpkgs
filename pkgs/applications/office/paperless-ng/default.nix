@@ -1,0 +1,158 @@
+{ lib
+, fetchurl
+, python3
+, ghostscript
+, imagemagick
+, jbig2enc
+, ocrmypdf
+, optipng
+, pngquant
+, qpdf
+, tesseract4
+, unpaper
+}:
+
+let
+  py = python3.override {
+    packageOverrides = self: super: {
+      django = super.django_3;
+      django-picklefield = super.django-picklefield.overrideAttrs (oldAttrs: {
+        # Checks do not pass with django 3
+        doInstallCheck = false;
+      });
+    };
+  };
+
+  path = lib.makeBinPath [ ghostscript imagemagick jbig2enc optipng pngquant qpdf tesseract4 unpaper ];
+in
+py.pkgs.pythonPackages.buildPythonApplication rec {
+  pname = "paperless-ng";
+  version = "1.4.2";
+
+  src = fetchurl {
+    url = "https://github.com/jonaswinkler/paperless-ng/releases/download/ng-${version}/${pname}-${version}.tar.xz";
+    sha256 = "zHRUWctEUEa4BREYQpZ3aJfoA5ucWkuRUvmPBUL801U=";
+  };
+
+  format = "other";
+
+  # Make bind address configurable
+  prePatch = ''
+    substituteInPlace gunicorn.conf.py --replace "bind = '0.0.0.0:8000'" ""
+  '';
+
+  propagatedBuildInputs = with py.pkgs.pythonPackages; [
+    aioredis
+    arrow
+    asgiref
+    async-timeout
+    attrs
+    autobahn
+    automat
+    blessed
+    certifi
+    cffi
+    channels-redis
+    channels
+    chardet
+    click
+    coloredlogs
+    concurrent-log-handler
+    constantly
+    cryptography
+    daphne
+    dateparser
+    django-cors-headers
+    django_extensions
+    django-filter
+    django-picklefield
+    django-q
+    django
+    djangorestframework
+    filelock
+    fuzzywuzzy
+    gunicorn
+    h11
+    hiredis
+    httptools
+    humanfriendly
+    hyperlink
+    idna
+    imap-tools
+    img2pdf
+    incremental
+    inotify-simple
+    inotifyrecursive
+    joblib
+    langdetect
+    lxml
+    msgpack
+    numpy
+    ocrmypdf
+    pathvalidate
+    pdfminer
+    pikepdf
+    pillow
+    pluggy
+    portalocker
+    psycopg2
+    pyasn1-modules
+    pyasn1
+    pycparser
+    pyopenssl
+    python-dateutil
+    python-dotenv
+    python-gnupg
+    python-Levenshtein
+    python_magic
+    pytz
+    pyyaml
+    redis
+    regex
+    reportlab
+    requests
+    scikitlearn
+    scipy
+    service-identity
+    six
+    sortedcontainers
+    sqlparse
+    threadpoolctl
+    tika
+    tqdm
+    twisted.extras.tls
+    txaio
+    tzlocal
+    urllib3
+    uvicorn
+    uvloop
+    watchdog
+    watchgod
+    wcwidth
+    websockets
+    whitenoise
+    whoosh
+    zope_interface
+  ];
+
+  installPhase = ''
+    mkdir -p $out/bin $out/lib
+    cp -r . $out/lib/paperless-ng
+    ln -s $out/lib/paperless-ng/src/manage.py $out/bin/paperless-ng
+    chmod +x $out/lib/paperless-ng/src/manage.py
+    wrapProgram $out/bin/paperless-ng \
+      --prefix PYTHONPATH : "$PYTHONPATH" \
+      --prefix PATH : "${path}"
+  '';
+
+  # PYTHONPATH of all dependencies for use in the service
+  passthru.pythonPath = (python3.pkgs.makePythonPath propagatedBuildInputs);
+  passthru.path = path;
+
+  meta = with lib; {
+    description = "A supercharged version of paperless: scan, index, and archive all of your physical documents";
+    homepage = "https://paperless-ng.readthedocs.io/en/latest/";
+    license = licenses.gpl3;
+    maintainers = with maintainers; [ Flakebi ];
+  };
+}
