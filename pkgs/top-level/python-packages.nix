@@ -8141,6 +8141,8 @@ in {
 
   tifffile = callPackage ../development/python-modules/tifffile { };
 
+  tika = callPackage ../development/python-modules/tika { };
+
   tiledb = callPackage ../development/python-modules/tiledb {
     inherit (pkgs) tiledb;
   };
