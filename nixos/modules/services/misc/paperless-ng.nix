@@ -13,8 +13,9 @@ let
     GUNICORN_CMD_ARGS = "--bind=${cfg.address}:${toString cfg.port}";
   } // cfg.extraConfig;
 
-  setupEnv = lib.concatStringsSep "\n" (mapAttrsToList (name: val: "export ${name}=\"${val}\"") env);
-  manage = pkgs.writeShellScript "manage" ''
+  manage = let
+    setupEnv = lib.concatStringsSep "\n" (mapAttrsToList (name: val: "export ${name}=\"${val}\"") env);
+  in pkgs.writeShellScript "manage" ''
     ${setupEnv}
     exec ${cfg.package}/bin/paperless-ng "$@"
   '';
@@ -135,7 +136,6 @@ in
           ln -sf ${manage} ${cfg.dataDir}/paperless-ng-manage
         fi
 
-        ${setupEnv}
         # Auto-migrate on first run or if the package has changed
         versionFile="${cfg.dataDir}/src-version"
         if [[ $(cat "$versionFile" 2>/dev/null) != ${cfg.package} ]]; then
