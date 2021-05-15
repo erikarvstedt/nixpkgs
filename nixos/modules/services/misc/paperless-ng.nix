@@ -62,13 +62,13 @@ in
     address = mkOption {
       type = types.str;
       default = "localhost";
-      description = "Server listening address.";
+      description = "Web interface address.";
     };
 
     port = mkOption {
       type = types.int;
       default = 28981;
-      description = "Server port to listen on.";
+      description = "Web interface port.";
     };
 
     extraConfig = mkOption {
