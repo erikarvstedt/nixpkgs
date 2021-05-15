@@ -145,9 +145,11 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
       --prefix PATH : "${path}"
   '';
 
-  # PYTHONPATH of all dependencies for use in the service
-  passthru.pythonPath = (python3.pkgs.makePythonPath propagatedBuildInputs);
-  passthru.path = path;
+  passthru = {
+    # PYTHONPATH of all dependencies used by the package
+    pythonPath = python3.pkgs.makePythonPath propagatedBuildInputs;
+    inherit path;
+  };
 
   meta = with lib; {
     description = "A supercharged version of paperless: scan, index, and archive all of your physical documents";
