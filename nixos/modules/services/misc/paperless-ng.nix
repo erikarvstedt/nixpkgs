@@ -164,7 +164,10 @@ in
       description = "Paperless web server";
       serviceConfig = {
         User = cfg.user;
-        ExecStart = "${pkgs.python3Packages.gunicorn}/bin/gunicorn -c ${cfg.package}/lib/paperless-ng/gunicorn.conf.py paperless.asgi:application";
+        ExecStart = ''
+          ${pkgs.python3Packages.gunicorn}/bin/gunicorn \
+            -c ${cfg.package}/lib/paperless-ng/gunicorn.conf.py paperless.asgi:application
+        '';
         Restart = "on-failure";
       };
       environment = env // {
