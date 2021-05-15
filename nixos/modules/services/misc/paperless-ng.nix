@@ -22,18 +22,6 @@ let
 
   # Secure the services
   defaultServiceConfig = {
-    BindReadOnlyPaths = [
-      "/nix/store"
-      "-/etc/resolv.conf"
-      "-/etc/nsswitch.conf"
-      "-/etc/hosts"
-      "-/etc/localtime"
-    ];
-    BindPaths = [
-      cfg.consumptionDir
-      cfg.dataDir
-      cfg.mediaDir
-    ];
     CapabilityBoundingSet = "";
     # ProtectClock adds DeviceAllow=char-rtc r
     DeviceAllow = "";
@@ -57,13 +45,17 @@ let
     ProtectKernelModules = true;
     ProtectKernelTunables = true;
     ProtectProc = "invisible";
+    ReadWritePaths = [
+      cfg.consumptionDir
+      cfg.dataDir
+      cfg.mediaDir
+    ];
     RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];
     RestrictNamespaces = true;
     RestrictRealtime = true;
     RestrictSUIDSGID = true;
     SystemCallArchitectures = "native";
     SystemCallFilter = [ "@system-service" "~@privileged @resources @setuid @keyring" ];
-    TemporaryFileSystem = "/:ro";
     UMask = "0066";
   };
 in
