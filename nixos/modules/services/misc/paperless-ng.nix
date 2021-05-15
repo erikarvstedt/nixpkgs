@@ -104,9 +104,9 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = !config.services.paperless.enable ||
+        assertion = config.services.paperless.enable ->
           (config.services.paperless.dataDir != cfg.dataDir && config.services.paperless.port != cfg.port);
-        message = "Paperless-ng replaces Paperless, either disable paperless or assign a new dataDir and port to one of them";
+        message = "Paperless-ng replaces Paperless, either disable Paperless or assign a new dataDir and port to one of them";
       }
     ];
 
