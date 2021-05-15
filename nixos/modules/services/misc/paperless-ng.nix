@@ -224,7 +224,7 @@ in
         AmbientCapabilities = "CAP_NET_BIND_SERVICE";
         CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
         # gunicorn needs setuid
-        SystemCallFilter = [ "@system-service" "~@privileged @resources @keyring" "@setuid" ];
+        SystemCallFilter = defaultServiceConfig.SystemCallFilter ++ [ "@setuid" ];
       };
       environment = env // {
         PATH = mkForce cfg.package.path;
