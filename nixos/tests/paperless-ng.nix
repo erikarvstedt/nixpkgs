@@ -19,7 +19,7 @@ import ./make-test-python.nix ({ lib, ... }: {
             "-annotate +5+20 'hello world 16-10-2005' /var/lib/paperless/consume/doc.png"
         )
 
-    with subtest("Service gets ready"):
+    with subtest("Web interface gets ready"):
         machine.wait_for_unit("paperless-ng-web.service")
         # Wait until server accepts connections
         machine.wait_until_succeeds("curl -fs localhost:28981")
@@ -32,7 +32,7 @@ import ./make-test-python.nix ({ lib, ... }: {
         )
         machine.succeed(f'echo "{create_admin_cmd}" | /var/lib/paperless/paperless-ng-manage shell')
 
-    with subtest("Test document is consumed"):
+    with subtest("Document is consumed"):
         machine.wait_until_succeeds(
             "(($(curl -u admin:admin -fs localhost:28981/api/documents/ | jq .count) == 1))"
         )
