@@ -6,7 +6,6 @@ import ./make-test-python.nix ({ lib, ... }: {
 
   nodes.machine = { pkgs, ... }: {
     environment.systemPackages = with pkgs; [ imagemagick jq ];
-    services.redis.enable = true;
     services.paperless-ng.enable = true;
     virtualisation.memorySize = 1024;
   };
