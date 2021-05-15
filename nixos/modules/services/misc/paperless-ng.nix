@@ -35,23 +35,21 @@ let
       cfg.mediaDir
     ];
     CapabilityBoundingSet = "";
-    # ProtectClock= adds DeviceAllow=char-rtc r
+    # ProtectClock adds DeviceAllow=char-rtc r
     DeviceAllow = "";
-    # User is set explicitely
-    #DynamicUser = true;
     LockPersonality = true;
     MemoryDenyWriteExecute = true;
     NoNewPrivileges = true;
     PrivateDevices = true;
     PrivateMounts = true;
-    # Needs to communicate to redis
-    #PrivateNetwork = true;
+    # Needs to connect to redis
+    # PrivateNetwork = true;
     PrivateTmp = true;
     PrivateUsers = true;
     ProcSubset = "pid";
     ProtectClock = true;
     # Breaks if the home dir of the user is in /home
-    #ProtectHome = true;
+    # ProtectHome = true;
     ProtectHostname = true;
     ProtectSystem = "strict";
     ProtectControlGroups = true;
