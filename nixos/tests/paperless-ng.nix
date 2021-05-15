@@ -19,11 +19,6 @@ import ./make-test-python.nix ({ lib, ... }: {
             "-annotate +5+20 'hello world 16-10-2005' /var/lib/paperless/consume/doc.png"
         )
 
-    with subtest("Web interface gets ready"):
-        machine.wait_for_unit("paperless-ng-web.service")
-        # Wait until server accepts connections
-        machine.wait_until_succeeds("curl -fs localhost:28981")
-
     with subtest("Create admin user"):
         create_admin_cmd = (
             "from django.contrib.auth import get_user_model;"
@@ -31,6 +26,11 @@ import ./make-test-python.nix ({ lib, ... }: {
             "User.objects.create_superuser('admin', 'admin@localhost', 'admin')"
         )
         machine.succeed(f'echo "{create_admin_cmd}" | /var/lib/paperless/paperless-ng-manage shell')
+
+    with subtest("Web interface gets ready"):
+        machine.wait_for_unit("paperless-ng-web.service")
+        # Wait until server accepts connections
+        machine.wait_until_succeeds("curl -fs localhost:28981")
 
     with subtest("Document is consumed"):
         machine.wait_until_succeeds(
