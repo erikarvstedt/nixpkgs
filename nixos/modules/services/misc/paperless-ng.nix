@@ -6,8 +6,6 @@ let
 
   defaultUser = "paperless";
 
-  pythonEnv = pkgs.python3.withPackages (ps: [ cfg.package ]);
-
   env = {
     PAPERLESS_DATA_DIR = cfg.dataDir;
     PAPERLESS_MEDIA_ROOT = cfg.mediaDir;
