@@ -164,7 +164,7 @@ in
     ];
 
     # Enable redis if no special url is set
-    services.redis.enable = mkIf (! hasAttr "PAPERLESS_REDIS" env) (mkDefault true);
+    services.redis.enable = mkIf (!hasAttr "PAPERLESS_REDIS" env) true;
 
     systemd.tmpfiles.rules = [
       "d '${cfg.dataDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
