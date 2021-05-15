@@ -166,13 +166,11 @@ in
         User = cfg.user;
         ExecStart = "${pkgs.python3Packages.gunicorn}/bin/gunicorn -c ${cfg.package}/lib/paperless-ng/gunicorn.conf.py paperless.asgi:application";
         Restart = "on-failure";
-        Environment = [
-          # Set PATH and PYTHONPATH
-          "PATH=${cfg.package.path}"
-          "PYTHONPATH=${cfg.package.pythonPath}:${cfg.package}/lib/paperless-ng/src"
-        ];
       };
-      environment = env;
+      environment = env // {
+        PATH = mkForce cfg.package.path;
+        PYTHONPATH = "${cfg.package.pythonPath}:${cfg.package}/lib/paperless-ng/src";
+      };
       # Bind to `paperless-ng-consumer` so that the server never runs
       # during migrations
       bindsTo = [ "paperless-ng-consumer.service" ];
