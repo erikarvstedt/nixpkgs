@@ -150,7 +150,7 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     pythonPath = python3.pkgs.makePythonPath propagatedBuildInputs;
     inherit path;
 
-    tests.basic-functionality = nixosTests.paperless-ng;
+    tests = { inherit (nixosTests) paperless-ng; };
   };
 
   meta = with lib; {
