@@ -136,11 +136,10 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
   ];
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib
+    mkdir -p $out/lib
     cp -r . $out/lib/paperless-ng
-    ln -s $out/lib/paperless-ng/src/manage.py $out/bin/paperless-ng
     chmod +x $out/lib/paperless-ng/src/manage.py
-    wrapProgram $out/bin/paperless-ng \
+    makeWrapper $out/lib/paperless-ng/src/manage.py $out/bin/paperless-ng \
       --prefix PYTHONPATH : "$PYTHONPATH" \
       --prefix PATH : "${path}"
   '';
