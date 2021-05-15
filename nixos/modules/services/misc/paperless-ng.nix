@@ -31,6 +31,9 @@ in
         When started, the Paperless database is automatically created if it doesn't
         exist and updated if the Paperless package has changed.
         Both tasks are achieved by running a Django migration.
+
+        A script to manage the Paperless instance (by wrapping Django's manage.py) is linked to
+        <literal>''${dataDir}/paperless-ng-manage</literal>.
       '';
     };
 
