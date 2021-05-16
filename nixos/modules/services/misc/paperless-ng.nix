@@ -64,7 +64,7 @@ let
     SystemCallArchitectures = "native";
     SystemCallFilter = [ "@system-service" "~@privileged @resources @setuid @keyring" ];
     TemporaryFileSystem = "/:ro";
-    UMask = "0066";
+    UMask = "026";
   };
 in
 {
