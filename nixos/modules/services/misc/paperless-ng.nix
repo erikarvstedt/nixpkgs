@@ -182,18 +182,10 @@ in
         Restart = "on-failure";
       };
       environment = env;
-      after = [ "systemd-tmpfiles-setup.service" ];
-      wantedBy = [ "multi-user.target" ];
-      preStart = ''
-        ln -sf ${manage} ${cfg.dataDir}/paperless-ng-manage
-
-        # Auto-migrate on first run or if the package has changed
-        versionFile="${cfg.dataDir}/src-version"
-        if [[ $(cat "$versionFile" 2>/dev/null) != ${cfg.package} ]]; then
-          ${cfg.package}/bin/paperless-ng migrate
-          echo ${cfg.package} > "$versionFile"
-        fi
-      '';
+      # Bind to `paperless-ng-server` so that the consumer never runs
+      # during migrations
+      bindsTo = [ "paperless-ng-server.service" ];
+      after = [ "paperless-ng-server.service" ];
     };
 
     systemd.services.paperless-ng-server = {
@@ -204,11 +196,19 @@ in
         Restart = "on-failure";
       };
       environment = env;
-      # Bind to `paperless-ng-consumer` so that the server never runs
-      # during migrations
-      bindsTo = [ "paperless-ng-consumer.service" ];
-      after = [ "paperless-ng-consumer.service" ];
       wantedBy = [ "multi-user.target" ];
+      wants = [ "paperless-ng-consumer.service" "paperless-ng-web.service" ];
+
+      preStart = ''
+        ln -sf ${manage} ${cfg.dataDir}/paperless-ng-manage
+
+        # Auto-migrate on first run or if the package has changed
+        versionFile="${cfg.dataDir}/src-version"
+        if [[ $(cat "$versionFile" 2>/dev/null) != ${cfg.package} ]]; then
+          ${cfg.package}/bin/paperless-ng migrate
+          echo ${cfg.package} > "$versionFile"
+        fi
+      '';
     };
 
     systemd.services.paperless-ng-web = {
@@ -230,11 +230,10 @@ in
         PATH = mkForce cfg.package.path;
         PYTHONPATH = "${cfg.package.pythonPath}:${cfg.package}/lib/paperless-ng/src";
       };
-      # Bind to `paperless-ng-consumer` so that the server never runs
+      # Bind to `paperless-ng-server` so that the web server never runs
       # during migrations
-      bindsTo = [ "paperless-ng-consumer.service" ];
-      after = [ "paperless-ng-consumer.service" ];
-      wantedBy = [ "multi-user.target" ];
+      bindsTo = [ "paperless-ng-server.service" ];
+      after = [ "paperless-ng-server.service" ];
     };
 
     users = optionalAttrs (cfg.user == defaultUser) {
