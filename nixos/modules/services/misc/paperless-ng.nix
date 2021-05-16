@@ -174,20 +174,6 @@ in
       )
     ];
 
-    systemd.services.paperless-ng-consumer = {
-      description = "Paperless document consumer";
-      serviceConfig = defaultServiceConfig // {
-        User = cfg.user;
-        ExecStart = "${cfg.package}/bin/paperless-ng document_consumer";
-        Restart = "on-failure";
-      };
-      environment = env;
-      # Bind to `paperless-ng-server` so that the consumer never runs
-      # during migrations
-      bindsTo = [ "paperless-ng-server.service" ];
-      after = [ "paperless-ng-server.service" ];
-    };
-
     systemd.services.paperless-ng-server = {
       description = "Paperless document server";
       serviceConfig = defaultServiceConfig // {
@@ -209,6 +195,20 @@ in
           echo ${cfg.package} > "$versionFile"
         fi
       '';
+    };
+
+    systemd.services.paperless-ng-consumer = {
+      description = "Paperless document consumer";
+      serviceConfig = defaultServiceConfig // {
+        User = cfg.user;
+        ExecStart = "${cfg.package}/bin/paperless-ng document_consumer";
+        Restart = "on-failure";
+      };
+      environment = env;
+      # Bind to `paperless-ng-server` so that the consumer never runs
+      # during migrations
+      bindsTo = [ "paperless-ng-server.service" ];
+      after = [ "paperless-ng-server.service" ];
     };
 
     systemd.services.paperless-ng-web = {
