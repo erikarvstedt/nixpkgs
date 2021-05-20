@@ -111,6 +111,28 @@ in
       description = "Whether all users can write to the consumption dir.";
     };
 
+    passwordFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      example = "/run/keys/paperless-ng-password";
+      description = ''
+        A file containing the superuser password.
+
+        A superuser is required to access the web interface.
+        If unset, you can create a superuser manually by running
+        <literal>''${dataDir}/paperless-ng-manage createsuperuser</literal>.
+
+        The default superuser name is <literal>admin</literal>. To change it, set
+        option <option>extraConfig.PAPERLESS_ADMIN_USER</option>.
+        WARNING: When changing the superuser name after the initial setup, the old superuser
+        will continue to exist.
+
+        To disable login for the web interface, set the following:
+        <literal>extraConfig.PAPERLESS_AUTO_LOGIN_USERNAME = "admin";</literal>.
+        WARNING: Only use this on a trusted system without internet access to Paperless.
+      '';
+    };
+
     address = mkOption {
       type = types.str;
       default = "localhost";
@@ -195,7 +217,33 @@ in
           ${cfg.package}/bin/paperless-ng migrate
           echo ${cfg.package} > "$versionFile"
         fi
+      ''
+      + optionalString (cfg.passwordFile != null) ''
+        export PAPERLESS_ADMIN_USER="''${PAPERLESS_ADMIN_USER:-admin}"
+        export PAPERLESS_ADMIN_PASSWORD=$(cat "${cfg.dataDir}/superuser-password")
+        superuserState="$PAPERLESS_ADMIN_USER:$PAPERLESS_ADMIN_PASSWORD"
+        superuserStateFile="${cfg.dataDir}/superuser-state"
+
+        if [[ $(cat "$superuserStateFile" 2>/dev/null) != $superuserState ]]; then
+          ${cfg.package}/bin/paperless-ng manage_superuser
+          echo "$superuserState" > "$superuserStateFile"
+        fi
       '';
+    };
+
+    # Password copying can't be implemented as a privileged preStart script
+    # in 'paperless-ng-server' because 'defaultServiceConfig' limits the filesystem
+    # paths accessible by the service.
+    systemd.services.paperless-ng-copy-password = mkIf (cfg.passwordFile != null) {
+      requiredBy = [ "paperless-ng-server.service" ];
+      before = [ "paperless-ng-server.service" ];
+      serviceConfig = {
+        ExecStart = ''
+          ${pkgs.coreutils}/bin/install --mode 600 --owner '${cfg.user}' --compare \
+            '${cfg.passwordFile}' '${cfg.dataDir}/superuser-password'
+        '';
+        Type = "oneshot";
+      };
     };
 
     systemd.services.paperless-ng-consumer = {
