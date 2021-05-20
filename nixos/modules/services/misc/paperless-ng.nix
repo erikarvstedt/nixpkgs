@@ -22,6 +22,7 @@ let
 
   # Secure the services
   defaultServiceConfig = {
+    TemporaryFileSystem = "/:ro";
     BindReadOnlyPaths = [
       "/nix/store"
       "-/etc/resolv.conf"
@@ -64,7 +65,6 @@ let
     RestrictSUIDSGID = true;
     SystemCallArchitectures = "native";
     SystemCallFilter = [ "@system-service" "~@privileged @resources @setuid @keyring" ];
-    TemporaryFileSystem = "/:ro";
     UMask = "027";
   };
 in
