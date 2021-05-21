@@ -21,6 +21,17 @@ let
         # Checks do not pass with django 3
         doInstallCheck = false;
       });
+      # Avoid warning in django-q versions > 1.3.4
+      # https://github.com/jonaswinkler/paperless-ng/issues/857
+      # https://github.com/Koed00/django-q/issues/526
+      django-q = super.django-q.overridePythonAttrs (oldAttrs: rec {
+        version = "1.3.4";
+        src = super.fetchPypi {
+          inherit (oldAttrs) pname;
+          inherit version;
+          sha256 = "Uj1U3PG2YVLBtlj5FPAO07UYo0MqnezUiYc4yo274Q8=";
+        };
+      });
     };
   };
 
