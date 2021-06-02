@@ -25,8 +25,10 @@ python3Packages.buildPythonApplication rec {
     install README.md charge.config.example -Dt $out/share/doc/charge-lnd
   '';
 
-  # there are no tests and running the binary needs config
-  doCheck = false;
+  doInstallCheck = true;
+  installCheckPhase = ''
+    $out/bin/charge-lnd --help >/dev/null
+  '';
 
   meta = with lib; {
     description = "Simple policy-based fee manager for lightning network daemon";
