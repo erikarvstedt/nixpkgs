@@ -22,8 +22,7 @@ python3Packages.buildPythonApplication rec {
   ];
 
   postInstall = ''
-    mkdir -p $out/share/doc/charge-lnd
-    cp README.md charge.config.example $out/share/doc/charge-lnd
+    install README.md charge.config.example -Dt $out/share/doc/charge-lnd
   '';
 
   # there are no tests and running the binary needs config
