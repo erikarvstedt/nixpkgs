@@ -73,7 +73,8 @@ in
   imports = [
     (mkRemovedOptionModule [ "services" "paperless"] ''
       The paperless module has been removed as the upstream project died.
-      Users should migrate to the paperless-ng module (services.paperless-ng). More information can be found in the NixOS 21.11 release notes.
+      Users should migrate to the paperless-ng module (services.paperless-ng).
+      More information can be found in the NixOS 21.11 release notes.
     '')
   ];
 
