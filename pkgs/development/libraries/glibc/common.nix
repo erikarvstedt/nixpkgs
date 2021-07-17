@@ -120,6 +120,9 @@ stdenv.mkDerivation ({
       })
 
       ./fix-x64-abi.patch
+
+      # This patch requires additional processing in postPatch
+      ./add-extra-module-load-path.patch
     ]
     ++ lib.optional stdenv.hostPlatform.isMusl ./fix-rpc-types-musl-conflicts.patch
     ++ lib.optional stdenv.buildPlatform.isDarwin ./darwin-cross-build.patch;
@@ -133,6 +136,12 @@ stdenv.mkDerivation ({
       # nscd needs libgcc, and we don't want it dynamically linked
       # because we don't want it to depend on bootstrap-tools libs.
       echo "LDFLAGS-nscd += -static-libgcc" >> nscd/Makefile
+
+      # Required by ./add-extra-module-load-path.patch
+      [[ $out =~ /nix/store/([^-]+) ]]
+      storePathHash=''${BASH_REMATCH[1]}
+      nssModulesPath=/run/nss-modules-$storePathHash/lib/
+      sed -i "s|@NIXOS_NSS_MODULES_PATH@|$nssModulesPath|g" nss/nss_module.c
     ''
     # FIXME: find a solution for infinite recursion in cross builds.
     # For now it's hopefully acceptable that IDN from libc doesn't reliably work.
