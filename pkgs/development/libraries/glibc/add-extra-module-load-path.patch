@@ -1,0 +1,75 @@
+Add NSS module load path /run/nss-modules${word_size}-${glibc_version}/lib
+
+If this path is not present at runtime, the behaviour of libc is unchanged.
+
+If this path is present:
+- Don't use nscd
+- Use this load path as a fallback after paths ${glibc.out}/lib and LD_LIBRARY_PATH
+
+On NixOS, this allows ABI-compatible glibc clients to directly load NSS modules
+instead of using nscd for name service requests.
+nscd has caching bugs and leaks DNS requests across network namespaces.
+
+nscd, if running, will still be used by ABI-incompatible glibc clients.
+(Such as 32-bit binaries on a 64-bit host or binaries with older glibc versions.)
+This guarantees full backwards compatibility.
+
+On non-NixOS systems, this shouldn't change behaviour, as the path
+doesn't exist there.
+
+diff --git a/nscd/nscd_helper.c b/nscd/nscd_helper.c
+index 462504d8..65cca10d 100644
+--- a/nscd/nscd_helper.c
++++ b/nscd/nscd_helper.c
+@@ -169,6 +169,12 @@ open_socket (request_type type, const char *key, size_t keylen)
+ {
+   int sock;
+ 
++  /* Don't use nscd when the platform-specific NixOS module load path is present  */
++#include "../nss/nixos-nss-modules-path.h"
++  if (access(NIXOS_NSS_MODULES_PATH, F_OK) == 0) {
++    return -1;
++  }
++
+   sock = __socket (PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+   if (sock < 0)
+     return -1;
+diff --git a/nss/nixos-nss-modules-path.h b/nss/nixos-nss-modules-path.h
+new file mode 100644
+index 00000000..20a5643b
+--- /dev/null
++++ b/nss/nixos-nss-modules-path.h
+@@ -0,0 +1,3 @@
++#define STR_(x) #x
++#define STR(x) STR_(x)
++#define NIXOS_NSS_MODULES_PATH "/run/nss-modules" STR(__WORDSIZE) "-" STR(__GLIBC__) "." STR(__GLIBC_MINOR__) "/lib/"
+diff --git a/nss/nss_module.c b/nss/nss_module.c
+index 6c5f341f..f5296507 100644
+--- a/nss/nss_module.c
++++ b/nss/nss_module.c
+@@ -133,6 +133,25 @@ module_load (struct nss_module *module)
+       return false;
+ 
+     handle = __libc_dlopen (shlib_name);
++
++    /* After loading from the default locations, try loading from
++       the NixOS module load path. */
++    if (handle == NULL) {
++
++#include "nixos-nss-modules-path.h"
++      const char nix_nss_path[] = NIXOS_NSS_MODULES_PATH;
++      char shlib_path[1024];
++      size_t nix_nss_path_len = sizeof(nix_nss_path) - 1;
++      size_t shlib_name_len = strlen(shlib_name);
++      size_t shlib_path_len = nix_nss_path_len + shlib_name_len;
++
++      if (shlib_path_len < sizeof(shlib_path)) {
++        memcpy(&shlib_path[0], nix_nss_path, nix_nss_path_len);
++        memcpy(&shlib_path[nix_nss_path_len], shlib_name, shlib_name_len + 1);
++        handle = __libc_dlopen(shlib_path);
++      }
++    }
++
+     free (shlib_name);
+   }
+ 
