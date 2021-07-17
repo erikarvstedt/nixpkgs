@@ -6,13 +6,10 @@ with lib;
 
 {
   options = {
-
-    # NSS modules.  Hacky!
-    # Only works with nscd!
     system.nssModules = mkOption {
       type = types.listOf types.path;
       internal = true;
-      default = [];
+      default = [ ];
       description = ''
         Path containing NSS (Name Service Switch) modules.
         This allows several DNS resolution methods to be specified via
@@ -34,60 +31,40 @@ with lib;
         type = types.listOf types.str;
         description = ''
           List of passwd entries to configure in <filename>/etc/nsswitch.conf</filename>.
-
-          Note that "files" is always prepended while "systemd" is appended if nscd is enabled.
-
-          This option only takes effect if nscd is enabled.
         '';
-        default = [];
+        default = [ ];
       };
 
       group = mkOption {
         type = types.listOf types.str;
         description = ''
           List of group entries to configure in <filename>/etc/nsswitch.conf</filename>.
-
-          Note that "files" is always prepended while "systemd" is appended if nscd is enabled.
-
-          This option only takes effect if nscd is enabled.
         '';
-        default = [];
+        default = [ ];
       };
 
       shadow = mkOption {
         type = types.listOf types.str;
         description = ''
           List of shadow entries to configure in <filename>/etc/nsswitch.conf</filename>.
-
-          Note that "files" is always prepended.
-
-          This option only takes effect if nscd is enabled.
         '';
-        default = [];
+        default = [ ];
       };
 
       hosts = mkOption {
         type = types.listOf types.str;
         description = ''
           List of hosts entries to configure in <filename>/etc/nsswitch.conf</filename>.
-
-          Note that "files" is always prepended, and "dns" and "myhostname" are always appended.
-
-          This option only takes effect if nscd is enabled.
         '';
-        default = [];
+        default = [ ];
       };
 
       services = mkOption {
         type = types.listOf types.str;
         description = ''
           List of services entries to configure in <filename>/etc/nsswitch.conf</filename>.
-
-          Note that "files" is always prepended.
-
-          This option only takes effect if nscd is enabled.
         '';
-        default = [];
+        default = [ ];
       };
     };
   };
@@ -97,14 +74,13 @@ with lib;
   ];
 
   config = {
-    assertions = [
-      {
-        # Prevent users from disabling nscd, with nssModules being set.
-        # If disabling nscd is really necessary, it's still possible to opt out
-        # by forcing config.system.nssModules to [].
-        assertion = config.system.nssModules.path != "" -> config.services.nscd.enable;
-        message = "Loading NSS modules from system.nssModules (${config.system.nssModules.path}), requires services.nscd.enable being set to true.";
-      }
+    # Provide configured NSS modules at /run/nss-modules
+    # We can mix NSS modules from any version of glibc according to
+    # https://sourceware.org/legacy-ml/libc-help/2016-12/msg00008.html,
+    # so glibc upgrades shouldn't break old userland loading more recent NSS
+    # modules (and most likely, NSS modules are already loaded)
+    systemd.tmpfiles.rules = [
+      "L+ /run/nss-modules - - - - ${config.system.nssModules.path}"
     ];
 
     # Name Service Switch configuration file.  Required by the C
