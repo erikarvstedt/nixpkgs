@@ -6,20 +6,20 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "electrs";
-  version = "0.8.10";
+  version = "0.8.11";
 
   src = fetchFromGitHub {
     owner = "romanz";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0q7mvpflnzzm88jbsdxgvhk9jr5mvn23hhj2iwy2grnfngxsmz3y";
+    sha256 = "024sdyvrx7s4inldamq4c8lv0iijjyd18j1mm9x6xf2clmvicaa6";
   };
 
   # needed for librocksdb-sys
   nativeBuildInputs = [ llvmPackages.clang ];
   LIBCLANG_PATH = "${llvmPackages.libclang.lib}/lib";
 
-  cargoSha256 = "0i8npa840g4kz50n6x40z22x9apq8snw6xgjz4vn2kh67xc4c738";
+  cargoSha256 = "1cg64aj5gmkl7ddqhycdflmgk8k0kyasxgyayfdglg1wrm4k96z5";
 
   meta = with lib; {
     description = "An efficient re-implementation of Electrum Server in Rust";
