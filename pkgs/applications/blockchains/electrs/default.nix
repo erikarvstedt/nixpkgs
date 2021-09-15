@@ -19,7 +19,7 @@ rustPlatform.buildRustPackage rec {
   nativeBuildInputs = [ llvmPackages.clang ];
   LIBCLANG_PATH = "${llvmPackages.libclang.lib}/lib";
 
-  cargoSha256 = "1cg64aj5gmkl7ddqhycdflmgk8k0kyasxgyayfdglg1wrm4k96z5";
+  cargoSha256 = "0000000000000000000000000000000000000000000000000000";
 
   meta = with lib; {
     description = "An efficient re-implementation of Electrum Server in Rust";
