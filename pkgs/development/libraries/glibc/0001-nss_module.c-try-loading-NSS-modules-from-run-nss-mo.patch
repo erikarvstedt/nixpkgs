@@ -4,14 +4,14 @@ Date: Sun, 19 Sep 2021 13:26:33 +0200
 Subject: [PATCH] nss_module.c: try loading NSS modules from /run/nss-modules
  as a fallback
 
-On NixOS, glibc only looks for NSS modules in ${glibc.out}/lib, and what
-LD_LIBRARY_PATH is set to.
+Previously, glibc only looked for NSS modules in ${glibc.out}/lib
+and LD_LIBRARY_PATH.
 
-LD_LIBRARY_PATH is very invasive, so we don't want to set that globally.
-We previously worked this around by running nscd with LD_LIBRARY_PATH
-set, but nscd has some caching issues, and leak of resolution traffic,
-so it's cleaner to have glibc look for NSS modules in an additional
-path, that's provided by NixOS.
+LD_LIBRARY_PATH is very invasive, so we don't want to set that globally
+on NixOS. We previously worked around this by running nscd with LD_LIBRARY_PATH
+set, but nscd has some caching issues and leaks DNS requests across
+network namespaces, so it's cleaner to have glibc look for NSS modules
+in an additional path that's provided by NixOS.
 
 On non-NixOS distributions, this shouldn't change behaviour, as the path
 doesn't exist there.

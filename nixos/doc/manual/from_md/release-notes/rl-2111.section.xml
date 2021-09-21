@@ -1075,7 +1075,7 @@ Superuser created successfully.
           If you want to defer application restart to a later time,
           explicitly enable <literal>nscd</literal> via
           <literal>services.nscd.enable</literal> until the application
-          restart.
+          restarts.
         </para>
         <para>
           We can mix NSS modules from any version of glibc according to
