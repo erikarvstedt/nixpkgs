@@ -89,7 +89,7 @@ let
 
         # substitute environment variables
         (
-          umask 077
+          umask u=rw,go=
           awk '{
             for(varname in ENVIRON)
               gsub("@"varname"@", ENVIRON[varname])
