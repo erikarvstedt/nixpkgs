@@ -22,6 +22,7 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
 
     # wireless client
     networking.wireless = {
+      # override definition from qemu-vm.nix
       enable = lib.mkOverride 0 true;
       userControlled.enable = true;
       interfaces = [ "wlan1" ];
@@ -43,13 +44,10 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
         PSK_NASTY=",./;'[]\-= <>?:\"{}|_+ !@#$%^\&*()`~";
       '';
     };
-
   };
 
   testScript =
     ''
-      start_all()
-
       config_file = "/run/wpa_supplicant/wpa_supplicant.conf"
 
       with subtest("Configuration file has the right permissions"):
@@ -78,4 +76,3 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
           )
     '';
 })
-
