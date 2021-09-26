@@ -45,33 +45,32 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
     };
   };
 
-  testScript =
-    ''
-      config_file = "/run/wpa_supplicant/wpa_supplicant.conf"
+  testScript = ''
+    config_file = "/run/wpa_supplicant/wpa_supplicant.conf"
 
-      with subtest("Configuration file has the right permissions"):
-          machine.wait_for_file(config_file)
-          mode = machine.succeed(f"stat -c '%a' {config_file}").strip()
-          assert mode == "600", f"expected: 600, found: {mode}"
+    with subtest("Configuration file has the right permissions"):
+        machine.wait_for_file(config_file)
+        mode = machine.succeed(f"stat -c '%a' {config_file}").strip()
+        assert mode == "600", f"expected: 600, found: {mode}"
 
-      with subtest("Secrets variables have been substituted"):
-          machine.fail(f"grep -q @PSK_NIXOS_TEST@ {config_file}")
-          machine.fail(f"grep -q @PSK_SPECIAL_CHARS@ {config_file}")
-          machine.succeed(f"grep -q @PSK_MISSING@ {config_file}")
-          machine.succeed(f"grep -q P@ssowrdWithSome@tSymbol {config_file}")
+    with subtest("Secrets variables have been substituted"):
+        machine.fail(f"grep -q @PSK_NIXOS_TEST@ {config_file}")
+        machine.fail(f"grep -q @PSK_SPECIAL_CHARS@ {config_file}")
+        machine.succeed(f"grep -q @PSK_MISSING@ {config_file}")
+        machine.succeed(f"grep -q P@ssowrdWithSome@tSymbol {config_file}")
 
-          # save file for manual inspection
-          machine.copy_from_vm(config_file)
+        # save file for manual inspection
+        machine.copy_from_vm(config_file)
 
-      with subtest("Daemon is running and accepting connections"):
-          machine.wait_for_unit("wpa_supplicant-wlan1.service")
-          status = machine.succeed("wpa_cli -i wlan1 status")
-          assert "Failed to connect" not in status, \
-                 "Failed to connect to the daemon"
+    with subtest("Daemon is running and accepting connections"):
+        machine.wait_for_unit("wpa_supplicant-wlan1.service")
+        status = machine.succeed("wpa_cli -i wlan1 status")
+        assert "Failed to connect" not in status, \
+               "Failed to connect to the daemon"
 
-      with subtest("Daemon can connect to the access point"):
-          machine.wait_until_succeeds(
-            "wpa_cli -i wlan1 status | grep -q wpa_state=COMPLETED"
-          )
-    '';
+    with subtest("Daemon can connect to the access point"):
+        machine.wait_until_succeeds(
+          "wpa_cli -i wlan1 status | grep -q wpa_state=COMPLETED"
+        )
+  '';
 })
