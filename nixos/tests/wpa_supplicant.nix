@@ -17,7 +17,7 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
       wpa = true;
       interface = "wlan0";
       ssid = "nixos-test";
-      wpaPassphrase = "reproducibility";
+      wpaPassphrase = "mypassword";
     };
 
     # wireless client
@@ -29,19 +29,18 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
 
       networks = {
         # test network
-        nixos-test.psk = "reproducibility";
+        nixos-test.psk = "@PSK_NIXOS_TEST@";
 
         # secrets substitution test cases
-        test1.psk = "@PSK_VALID@";              # should be replaced
-        test2.psk = "@PSK_MISSING@";            # should not be replaced
-        test3.psk = "P@ssowrdWithSome@tSymbol"; # should not be replaced
-        test4.psk = "@PSK_NASTY@";              # should be replaced
+        test1.psk = "@PSK_MISSING@";            # should not be replaced
+        test2.psk = "P@ssowrdWithSome@tSymbol"; # should not be replaced
+        test3.psk = "@PSK_NASTY@";              # should be replaced
       };
 
       # secrets
       environmentFile = pkgs.writeText "wpa-secrets" ''
-        PSK_VALID="S0m3BadP4ssw0rd";
-        PSK_NASTY=",./;'[]\-= <>?:\"{}|_+ !@#$%^\&*()`~";
+        PSK_NIXOS_TEST="mypassword"
+        PSK_NASTY=",./;'[]\-= <>?:\"{}|_+ !@#$%^\&*()`~"
       '';
     };
   };
@@ -56,7 +55,7 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
           assert mode == "600", f"expected: 600, found: {mode}"
 
       with subtest("Secrets variables have been substituted"):
-          machine.fail(f"grep -q @PSK_VALID@ {config_file}")
+          machine.fail(f"grep -q @PSK_NIXOS_TEST@ {config_file}")
           machine.succeed(f"grep -q @PSK_MISSING@ {config_file}")
           machine.succeed(f"grep -q P@ssowrdWithSome@tSymbol {config_file}")
           machine.fail(f"grep -q PSK_NASTY {config_file}")
