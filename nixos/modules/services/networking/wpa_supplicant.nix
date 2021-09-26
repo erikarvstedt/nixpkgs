@@ -74,7 +74,7 @@ let
       wantedBy = [ "multi-user.target" ];
       stopIfChanged = false;
 
-      path = [ package pkgs.gawk ];
+      path = [ package ];
       serviceConfig.RuntimeDirectory = "wpa_supplicant";
       serviceConfig.EnvironmentFile = mkIf (cfg.environmentFile != null)
         (builtins.toString cfg.environmentFile);
@@ -90,7 +90,7 @@ let
         # substitute environment variables
         (
           umask u=rw,go=
-          awk '{
+          ${pkgs.gawk}/bin/awk '{
             for(varname in ENVIRON)
               gsub("@"varname"@", ENVIRON[varname])
             print
