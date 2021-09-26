@@ -180,17 +180,18 @@ in {
         type = types.nullOr types.path;
         default = null;
         description = ''
-          Environment file (see <literal>systemd.exec(5)</literal>
-          "EnvironmentFile=" section for the syntax) to define variables for
-          the wireless configuration.
+          File consisting of lines of the form <literal>varname=value</literal>
+          to define variables for the wireless configuration.
+
+          See section "EnvironmentFile=" in <literal>systemd.exec(5)</literal>
+          for a syntax reference.
 
           This option can be used to safely include secrets (PSKs, passwords,
-          etc.) in the <option>networking.wireless.networks</option> option via
-          environment variables.
+          etc.) in option <option>networking.wireless.networks</option>.
 
-          For example, if you store your wifi password under the MY_PASSWORD
-          variable, you can then refer to it with the special syntax
-          <literal>@MY_PASSWORD@</literal> in the value of the
+          For example, if you define your WLAN password with line
+          <literal>WLAN_HOME=mypassword</literal>, you can then refer to it with
+          the special syntax <literal>@WLAN_HOME@</literal> in the value of the
           <literal>psk</literal> or <literal>pskRaw</literal> options.
         '';
       };
@@ -364,9 +365,10 @@ in {
           { echelon = {                   # SSID with no spaces or special characters
               psk = "abcdefgh";           # (password will be written to /nix/store!)
             };
-            echelon = {                   # safe version of the above: read PSK from the
-              psk = "@PSK_ECHELON@";      # environmentFile, won't leak into /nix/store
-            };
+            echelon = {                   # safe version of the above: read PSK from variable
+              psk = "@PSK_ECHELON@";      # PSK_ECHELON, defined via environmentFile.
+            };                            # This won't leak into /nix/store
+
             "echelon's AP" = {            # SSID with spaces and/or special characters
                psk = "ijklmnop";          # (password will be written to /nix/store!)
             };
