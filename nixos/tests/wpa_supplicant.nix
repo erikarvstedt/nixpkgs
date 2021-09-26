@@ -32,15 +32,15 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
         nixos-test.psk = "@PSK_NIXOS_TEST@";
 
         # secrets substitution test cases
-        test1.psk = "@PSK_MISSING@";            # should not be replaced
-        test2.psk = "P@ssowrdWithSome@tSymbol"; # should not be replaced
-        test3.psk = "@PSK_NASTY@";              # should be replaced
+        test1.psk = "@PSK_SPECIAL_CHARS@";      # should be replaced
+        test2.psk = "@PSK_MISSING@";            # should not be replaced
+        test3.psk = "P@ssowrdWithSome@tSymbol"; # should not be replaced
       };
 
       # secrets
       environmentFile = pkgs.writeText "wpa-secrets" ''
         PSK_NIXOS_TEST="mypassword"
-        PSK_NASTY=",./;'[]\-= <>?:\"{}|_+ !@#$%^\&*()`~"
+        PSK_SPECIAL_CHARS=",./;'[]\-= <>?:\"{}|_+ !@#$%^\&*()`~"
       '';
     };
   };
@@ -56,9 +56,9 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
 
       with subtest("Secrets variables have been substituted"):
           machine.fail(f"grep -q @PSK_NIXOS_TEST@ {config_file}")
+          machine.fail(f"grep -q @PSK_SPECIAL_CHARS@ {config_file}")
           machine.succeed(f"grep -q @PSK_MISSING@ {config_file}")
           machine.succeed(f"grep -q P@ssowrdWithSome@tSymbol {config_file}")
-          machine.fail(f"grep -q PSK_NASTY {config_file}")
 
           # save file for manual inspection
           machine.copy_from_vm(config_file)
