@@ -54,10 +54,9 @@ import ./make-test-python.nix ({ pkgs, lib, ...}:
     ''
       config_file = "/run/wpa_supplicant/wpa_supplicant.conf"
 
-      with subtest("Configuration file has the right permissions"):
+      with subtest("Configuration file is inaccessible to other users"):
           machine.wait_for_file(config_file)
-          mode = machine.succeed(f"stat -c '%a' {config_file}").strip()
-          assert mode == "600", f"expected: 600, found: {mode}"
+          machine.fail(f"sudo -u nobody ls {config_file}")
 
       with subtest("Secrets variables have been substituted"):
           machine.fail(f"grep -q @PSK_VALID@ {config_file}")

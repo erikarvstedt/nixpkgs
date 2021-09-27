@@ -76,6 +76,7 @@ let
 
       path = [ package ];
       serviceConfig.RuntimeDirectory = "wpa_supplicant";
+      serviceConfig.RuntimeDirectoryMode = "700";
       serviceConfig.EnvironmentFile = mkIf (cfg.environmentFile != null)
         (builtins.toString cfg.environmentFile);
 
@@ -88,14 +89,11 @@ let
         ''}
 
         # substitute environment variables
-        (
-          umask 077
-          ${pkgs.gawk}/bin/awk '{
-            for(varname in ENVIRON)
-              gsub("@"varname"@", ENVIRON[varname])
-            print
-          }' "${configFile}" > "${finalConfig}"
-        )
+        ${pkgs.gawk}/bin/awk '{
+          for(varname in ENVIRON)
+            gsub("@"varname"@", ENVIRON[varname])
+          print
+        }' "${configFile}" > "${finalConfig}"
 
         iface_args="-s ${optionalString cfg.dbusControlled "-u"} -D${cfg.driver} ${configStr}"
 
