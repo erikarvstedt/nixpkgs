@@ -186,11 +186,11 @@ in {
           <refentrytitle>systemd.exec</refentrytitle><manvolnum>5</manvolnum>
           </citerefentry> for a syntax reference.
 
-          Secrets (PSKs, passwords, etc.) can be passed without adding them to
-          the world-readable Nix store, by specifying placeholder variables as
-          the values of the configuration options (such as
-          <option>networking.wireless.networks.&lt;name&gt;.psk</option>) and setting
-          these variables accordingly in the environment file.
+          Secrets (PSKs, passwords, etc.) can be provided without adding them to
+          the world-readable Nix store by defining them in the environment file and
+          referring to them in option <option>networking.wireless.networks</option>
+          with syntax <literal>@varname@</literal>.
+          Example:
 
           <programlisting>
           # content of /run/secrets/wireless.env
