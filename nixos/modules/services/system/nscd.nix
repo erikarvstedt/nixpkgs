@@ -50,6 +50,7 @@ in
 
         wantedBy = [ "nss-lookup.target" "nss-user-lookup.target" ];
 
+        environment = { LD_LIBRARY_PATH = makeLibraryPath config.system.nssModules.list; };
         restartTriggers = [
           config.environment.etc.hosts.source
           config.environment.etc."nsswitch.conf".source
