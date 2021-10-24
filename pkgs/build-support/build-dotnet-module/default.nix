@@ -19,7 +19,7 @@
 # If unset, all executables in the projects root will get installed. This may cause bloat!
 , executables ? null
 # The packages project file, which contains instructions on how to compile it.
-, projectFile ? null
+, projectFile ? throw "Defining the `projectFile` attribute is required. This is usually an `.csproj`, or `.sln` file."
 # The NuGet dependency file. This locks all NuGet dependency versions, as otherwise they cannot be deterministically fetched.
 # This can be generated using the `nuget-to-nix` tool.
 , nugetDeps ? null
@@ -35,8 +35,6 @@
 , dotnet-runtime ? dotnetCorePackages.runtime_5_0
 , ... } @ args:
 
-assert projectFile == null -> throw "Defining the `projectFile` attribute is required. This is usually an `.csproj`, or `.sln` file.";
-
 # TODO: Automatically generate a dependency file when a lockfile is present.
 # This file is unfortunately almost never present, as Microsoft recommands not to push this in upstream repositories.
 assert nugetDeps == null -> throw "Defining the `nugetDeps` attribute is required, as to lock the NuGet dependencies. This file can be generated using the `nuget-to-nix` tool.";
@@ -51,7 +49,7 @@ let
   });
 
   package = stdenv.mkDerivation (args // {
-    inherit buildType;
+    inherit projectFile buildType;
 
     nativeBuildInputs = args.nativeBuildInputs or [] ++ [ dotnet-sdk dotnetPackages.Nuget cacert makeWrapper ];
 
