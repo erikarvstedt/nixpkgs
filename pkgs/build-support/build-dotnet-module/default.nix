@@ -51,6 +51,8 @@ let
   });
 
   package = stdenv.mkDerivation (args // {
+    inherit buildType;
+
     nativeBuildInputs = args.nativeBuildInputs or [] ++ [ dotnet-sdk dotnetPackages.Nuget cacert makeWrapper ];
 
     # Stripping breaks the executable
