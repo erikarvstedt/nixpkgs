@@ -22,7 +22,7 @@
 , projectFile ? throw "Defining the `projectFile` attribute is required. This is usually an `.csproj`, or `.sln` file."
 # The NuGet dependency file. This locks all NuGet dependency versions, as otherwise they cannot be deterministically fetched.
 # This can be generated using the `nuget-to-nix` tool.
-, nugetDeps ? null
+, nugetDeps ? throw "Defining the `nugetDeps` attribute is required, as to lock the NuGet dependencies. This file can be generated using the `nuget-to-nix` tool."
 # Libraries that need to be available at runtime should be passed through this.
 # These get wrapped into `LD_LIBRARY_PATH`.
 , runtimeDeps ? []
@@ -35,11 +35,10 @@
 , dotnet-runtime ? dotnetCorePackages.runtime_5_0
 , ... } @ args:
 
-# TODO: Automatically generate a dependency file when a lockfile is present.
-# This file is unfortunately almost never present, as Microsoft recommands not to push this in upstream repositories.
-assert nugetDeps == null -> throw "Defining the `nugetDeps` attribute is required, as to lock the NuGet dependencies. This file can be generated using the `nuget-to-nix` tool.";
-
 let
+  # TODO: Automatically generate a dependency file when a lockfile is present.
+  # In this case `nugetDeps` could be made optional.
+  # A lockfile is unfortunately almost never present, as Microsoft recommends not to push this in upstream repositories.
   _nugetDeps = linkFarmFromDrvs "${name}-nuget-deps" (import nugetDeps {
     fetchNuGet = { name, version, sha256 }: fetchurl {
       name = "nuget-${name}-${version}.nupkg";
