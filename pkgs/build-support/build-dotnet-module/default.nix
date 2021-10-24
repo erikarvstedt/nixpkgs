@@ -1,6 +1,13 @@
 { lib, stdenv, makeWrapper, dotnetCorePackages, dotnetPackages, cacert, linkFarmFromDrvs, fetchurl }:
 
 { name ? "${args.pname}-${args.version}"
+# The package project file, which contains instructions on how to compile it.
+# This is usually a `.csproj` or `.sln` file.
+, projectFile
+# The NuGet dependency file. This locks all NuGet dependency versions, as otherwise they cannot be deterministically fetched.
+# This can be generated using the `nuget-to-nix` tool.
+, nugetDeps
+
 , enableParallelBuilding ? true
 # Flags to pass to `makeWrapper`. This is done to avoid double wrapping.
 , makeWrapperArgs ? []
@@ -18,11 +25,6 @@
 # Unfortunately, dotnet has no method for doing this automatically.
 # If unset, all executables in the projects root will get installed. This may cause bloat!
 , executables ? null
-# The packages project file, which contains instructions on how to compile it.
-, projectFile ? throw "Defining the `projectFile` attribute is required. This is usually an `.csproj`, or `.sln` file."
-# The NuGet dependency file. This locks all NuGet dependency versions, as otherwise they cannot be deterministically fetched.
-# This can be generated using the `nuget-to-nix` tool.
-, nugetDeps ? throw "Defining the `nugetDeps` attribute is required, as to lock the NuGet dependencies. This file can be generated using the `nuget-to-nix` tool."
 # Libraries that need to be available at runtime should be passed through this.
 # These get wrapped into `LD_LIBRARY_PATH`.
 , runtimeDeps ? []
