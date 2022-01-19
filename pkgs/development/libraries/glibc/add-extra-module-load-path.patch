@@ -1,4 +1,4 @@
-Add NSS module load path /run/nss-modules${word_size}-${glibc_version}/lib
+Add NSS module load path /run/nss-modules-${word_size}-${glibc_version}/lib
 as a fallback. Previously, glibc only looked for NSS modules in ${glibc.out}/lib and
 LD_LIBRARY_PATH.
 
