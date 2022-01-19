@@ -25,6 +25,10 @@ in
         default = true;
         description = ''
           Whether to enable the Name Service Cache Daemon.
+
+          When this option is disabled, NSS lookups from non-glibc NSS modules are disabled for:
+          - binaries that use a glibc version different from the system glibc
+          - 32-bit binaries on 64-bit hosts.
         '';
       };
 
