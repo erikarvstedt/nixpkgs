@@ -20,12 +20,6 @@ buildDotnetModule rec {
 
   dotnetFlags = lib.optionals altcoinSupport [ "/p:Configuration=Altcoins-Release" ];
 
-  # btcpayserver requires the publish directory as its working dir
-  # https://github.com/btcpayserver/btcpayserver/issues/1894
-  preInstall = ''
-    makeWrapperArgs+=(--run "cd $out/lib/btcpayserver")
-  '';
-
   postFixup = ''
     mv $out/bin/{BTCPayServer,btcpayserver}
   '';
