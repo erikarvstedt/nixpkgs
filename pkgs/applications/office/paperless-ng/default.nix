@@ -170,9 +170,13 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
   # - PATH with runtime binaries
   # - A temporary HOME directory for gnupg
   # - XDG_DATA_DIRS with test-specific fonts
+  #
+  # Skip test `slow_write_pdf` which fails on some systems:
+  # https://github.com/NixOS/nixpkgs/issues/136626
   checkPhase = ''
     pushd src
-    PATH="${path}:$PATH" HOME=$(mktemp -d) XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS" pytest
+    PATH="${path}:$PATH" HOME=$(mktemp -d) XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS" pytest \
+      -k "not slow_write_pdf"
     popd
   '';
 
