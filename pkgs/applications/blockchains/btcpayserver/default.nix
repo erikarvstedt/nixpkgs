@@ -18,7 +18,7 @@ buildDotnetModule rec {
   dotnet-sdk = dotnetCorePackages.sdk_6_0;
   dotnet-runtime = dotnetCorePackages.aspnetcore_6_0;
 
-  dotnetFlags = lib.optionals altcoinSupport [ "/p:Configuration=Altcoins-Release" ];
+  buildType = if altcoinSupport then "Altcoins-Release" else "Release";
 
   postFixup = ''
     mv $out/bin/{BTCPayServer,btcpayserver}
