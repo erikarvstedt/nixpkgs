@@ -177,6 +177,15 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     pytestCheckHook
   ];
 
+  installPhase = ''
+    mkdir -p $out/lib
+    cp -r . $out/lib/paperless-ng
+    chmod +x $out/lib/paperless-ng/src/manage.py
+    makeWrapper $out/lib/paperless-ng/src/manage.py $out/bin/paperless-ng \
+      --prefix PYTHONPATH : "$PYTHONPATH" \
+      --prefix PATH : "${path}"
+  '';
+
   # The tests require:
   # - PATH with runtime binaries
   # - A temporary HOME directory for gnupg
@@ -185,17 +194,7 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     export PATH="${path}:$PATH"
     export HOME=$(mktemp -d)
     export XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS"
-
     cd src
-  '';
-
-  installPhase = ''
-    mkdir -p $out/lib
-    cp -r . $out/lib/paperless-ng
-    chmod +x $out/lib/paperless-ng/src/manage.py
-    makeWrapper $out/lib/paperless-ng/src/manage.py $out/bin/paperless-ng \
-      --prefix PYTHONPATH : "$PYTHONPATH" \
-      --prefix PATH : "${path}"
   '';
 
   passthru = {
