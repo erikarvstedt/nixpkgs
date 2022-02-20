@@ -164,20 +164,25 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     pytest-sugar
     pytest-xdist
     factory_boy
+    pytestCheckHook
+  ];
+
+  disabledTests = [
+    # Skip test `slow_write_pdf` which fails on some systems:
+    # https://github.com/NixOS/nixpkgs/issues/136626
+    "not slow_write_pdf"
   ];
 
   # The tests require:
   # - PATH with runtime binaries
   # - A temporary HOME directory for gnupg
   # - XDG_DATA_DIRS with test-specific fonts
-  #
-  # Skip test `slow_write_pdf` which fails on some systems:
-  # https://github.com/NixOS/nixpkgs/issues/136626
-  checkPhase = ''
-    pushd src
-    PATH="${path}:$PATH" HOME=$(mktemp -d) XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS" pytest \
-      -k "not slow_write_pdf"
-    popd
+  preCheck = ''
+    export PATH="${path}:$PATH"
+    export HOME=$(mktemp -d)
+    export XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS"
+
+    cd src
   '';
 
   installPhase = ''
