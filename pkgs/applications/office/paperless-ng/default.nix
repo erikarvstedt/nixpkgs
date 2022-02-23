@@ -194,9 +194,10 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     export PATH="${path}:$PATH"
     export HOME=$(mktemp -d)
     export XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS"
-
-    # This doesn't affect the `installPhase` because `pytestCheckPhase` is run afterwards
-    cd src
+    pushd src
+  '';
+  postCheck = ''
+    popd
   '';
 
   passthru = {
