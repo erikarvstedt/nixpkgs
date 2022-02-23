@@ -165,18 +165,6 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     zope_interface
   ];
 
-  doCheck = true;
-  checkInputs = with py.pkgs.pythonPackages; [
-    pytest
-    pytest-cov
-    pytest-django
-    pytest-env
-    pytest-sugar
-    pytest-xdist
-    factory_boy
-    pytestCheckHook
-  ];
-
   installPhase = ''
     mkdir -p $out/lib
     cp -r . $out/lib/paperless-ng
@@ -185,6 +173,17 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
       --prefix PYTHONPATH : "$PYTHONPATH" \
       --prefix PATH : "${path}"
   '';
+
+  checkInputs = with py.pkgs.pythonPackages; [
+    pytest-django
+    pytest-env
+    pytest-sugar
+    pytest-xdist
+    factory_boy
+    pytestCheckHook
+  ];
+
+  pytestFlagsArray = [ "src" ];
 
   # The tests require:
   # - PATH with runtime binaries
@@ -195,11 +194,9 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     export HOME=$(mktemp -d)
     export XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS"
 
-    pushd src
-  '';
-
-  postCheck = ''
-    popd
+    # Disable unneeded code coverage test
+    substituteInPlace src/setup.cfg \
+      --replace "--cov --cov-report=html" ""
   '';
 
   passthru = {
