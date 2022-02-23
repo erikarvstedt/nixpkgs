@@ -190,12 +190,11 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
   # - PATH with runtime binaries
   # - A temporary HOME directory for gnupg
   # - XDG_DATA_DIRS with test-specific fonts
-  # - working directory changed to ./src for the duration of the checkPhase
   preCheck = ''
     export PATH="${path}:$PATH"
     export HOME=$(mktemp -d)
     export XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS"
-
+    # This doesn't affect the `installPhase` because `pytestCheckPhase` is run afterwards
     cd src
   '';
 
