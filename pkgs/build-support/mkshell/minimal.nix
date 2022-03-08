@@ -4,10 +4,7 @@
 # nix-shell. This differs from `mkShell` in that it does not use `stdenv`
 # (i.e. coreutils)
 {
-# a list of packages to add to the shell environment
-# we simplify here rather than `native` or `propagated` since
-# this is only ever used to be in a nix-shell; which is by default
-# the current system
+# A list of packages to add to the shell environment
 packages ? [ ], ... }@attrs:
 derivation ({
   inherit system;
