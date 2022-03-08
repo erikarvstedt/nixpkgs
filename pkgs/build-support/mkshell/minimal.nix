@@ -1,9 +1,8 @@
 { writeTextFile, writeScript, system }:
 
-# A special kind of derivation that is only meant to be consumed by the
-# nix-shell. This differs from the traditional `mkShell` in that:
-# It does not come with traditional stdenv (i.e. coreutils).
-# Its only dependency is essentially bash.
+# A special kind of derivation that is only meant to be consumed by
+# nix-shell. This differs from `mkShell` in that it does not use `stdenv`
+# (i.e. coreutils)
 {
 # a list of packages to add to the shell environment
 # we simplify here rather than `native` or `propagated` since
