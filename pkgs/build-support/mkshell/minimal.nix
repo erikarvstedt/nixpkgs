@@ -19,9 +19,10 @@ derivation ({
   # We use it here to setup the pure enviroment and do to clear envs like PATH
   # reference: https://github.com/NixOS/nix/blob/94ec9e47030c2a7280503d338f0dca7ad92811f5/src/nix-build/nix-build.cc#L494
   "stdenv" = writeTextFile rec {
+  stdenv = writeTextFile {
     name = "setup";
     executable = true;
-    destination = "/${name}";
+    destination = "/setup";
     text = ''
       set -e
 
