@@ -11,10 +11,9 @@ derivation ({
 
   name = "minimal-nix-shell";
 
-  # Nix checks if the stdenv attribute exists and sources that
-  # We use it here to setup the pure enviroment and do to clear envs like PATH
-  # reference: https://github.com/NixOS/nix/blob/94ec9e47030c2a7280503d338f0dca7ad92811f5/src/nix-build/nix-build.cc#L494
-  "stdenv" = writeTextFile rec {
+  # Nix checks if attribute `stdenv` exists and sources that.
+  # We use it here to setup the pure enviroment and to clear env vars like PATH.
+  # Reference: https://github.com/NixOS/nix/blob/94ec9e47030c2a7280503d338f0dca7ad92811f5/src/nix-build/nix-build.cc#L494
   stdenv = writeTextFile {
     name = "setup";
     executable = true;
@@ -32,10 +31,9 @@ derivation ({
     '';
   };
 
-  # Typically `mkShell` is not buildable. This has made it in practice, difficult to upload
+  # Typically, `mkShell` is not buildable. This has made it difficult to upload
   # the dependency closure to a binary cache. Rather than add a confusing attribute to capture this
-  # let's just make the nix-shell buildable but message to the user that it doesn't make much sense.
-  #
+  # just make the nix-shell buildable but message to the user that it doesn't make much sense.
   #
   # The builtin `export` dumps all current environment variables,
   # which is where all build input references end up (e.g. $PATH for
