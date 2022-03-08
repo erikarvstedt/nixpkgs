@@ -9,14 +9,13 @@ about the dependencies (i.e. coreutils vs. busybox).
 
 ```nix
 let
-  nixpkgs = import <nixpkgs> { };
+  pkgs = import <nixpkgs> {};
 in
-with nixpkgs;
-mkShellMinimal {
+pkgs.mkShellMinimal {
   name = "my-minimal-shell";
 
   # Place your dependencies here
-  packages = [ ];
+  packages = with pkgs; [ ];
 
   # You can do typical environment variable setting
   FOO = "bar";
