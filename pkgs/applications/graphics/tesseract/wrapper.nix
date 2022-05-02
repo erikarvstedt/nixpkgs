@@ -1,4 +1,5 @@
 { lib, makeWrapper, tesseractBase, languages
+, imagemagick
 
 # A list of languages like [ "eng" "spa" … ] or `null` for all available languages
 , enableLanguages ? null
@@ -19,7 +20,9 @@ let
 
     nativeBuildInputs = [ makeWrapper ];
 
-    buildCommand = ''
+    phases = [ "buildPhase" "installCheckPhase" ];
+
+    buildPhase = ''
       makeWrapper {$tesseractBase,$out}/bin/tesseract --set-default TESSDATA_PREFIX $out/share/tessdata
 
       # Recursively link include, share
@@ -45,6 +48,24 @@ let
          # This is a bug in Tesseract's internal tessdata discovery mechanism
          echo "eng.traineddata must be present in tessdata for Tesseract to work"
          exit 1
+      fi
+    '';
+
+    # Only run check when all languages are available
+    doInstallCheck = enableLanguages == null;
+    installCheckInputs = [ imagemagick ];
+    installCheckPhase = ''
+      text="hello nix"
+
+      convert -size 400x40 xc:white -font 'DejaVu-Sans' -pointsize 20 \
+        -fill black -annotate +5+20 "$text" /tmp/test-img.png 2>/dev/null
+      ocrResult=$($out/bin/tesseract /tmp/test-img.png - | tr -d "\f")
+
+      if [[ $ocrResult != $text ]]; then
+        echo "OCR test failed"
+        echo "expected: '$text'"
+        echo "actual: '$ocrResult'"
+        exit 1
       fi
     '';
   });
