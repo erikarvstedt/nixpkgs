@@ -286,12 +286,13 @@ in
         '';
         Restart = "on-failure";
 
-        AmbientCapabilities = lib.mkIf (cfg.port < 1024) [ "CAP_NET_BIND_SERVICE" ];
-        CapabilityBoundingSet = lib.mkIf (cfg.port < 1024) [ "CAP_NET_BIND_SERVICE" ];
         # gunicorn needs setuid, liblapack needs mbind
         SystemCallFilter = defaultServiceConfig.SystemCallFilter ++ [ "@setuid mbind" ];
         # Needs to serve web page
         PrivateNetwork = false;
+      } // optionalAttrs (cfg.port < 1024) {
+        AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+        CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
       };
       environment = env // {
         PATH = mkForce cfg.package.path;
