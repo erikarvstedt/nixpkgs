@@ -16,11 +16,11 @@ let
     PAPERLESS_MEDIA_ROOT = cfg.mediaDir;
     PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
     GUNICORN_CMD_ARGS = "--bind=${cfg.address}:${toString cfg.port}";
+  } // optionalAttrs (config.time.timeZone != null) {
+    PAPERLESS_TIME_ZONE = config.time.timeZone;
   } // (
     lib.mapAttrs (_: toString) cfg.extraConfig
-  ) // optionalAttrs (config.time.timeZone != null) {
-    PAPERLESS_TIME_ZONE = lib.mkDefault config.time.timeZone;
-  } // optionalAttrs enableRedis {
+  ) // optionalAttrs enableRedis {
     PAPERLESS_REDIS = "unix://${redisServer.unixSocket}";
   };
 
