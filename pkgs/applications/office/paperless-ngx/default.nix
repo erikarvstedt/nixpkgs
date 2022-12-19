@@ -227,7 +227,8 @@ python.pkgs.pythonPackages.buildPythonApplication rec {
     # Disable unneeded code coverage test
     substituteInPlace src/setup.cfg \
       --replace "--cov --cov-report=html" ""
-    # OCR on nixos recognizes the space in the picture, upstreams CI doesn't. See https://github.com/paperless-ngx/paperless-ngx/pull/2216
+    # OCR on NixOS recognizes the space in the picture, upstream CI doesn't.
+    # See https://github.com/paperless-ngx/paperless-ngx/pull/2216
     substituteInPlace src/paperless_tesseract/tests/test_parser.py \
       --replace "this is awebp document" "this is a webp document"
   '';
@@ -238,7 +239,6 @@ python.pkgs.pythonPackages.buildPythonApplication rec {
     # AssertionError: 10 != 4 (timezone/time issue)
     # Due to getting local time from modification date in test_consumer.py
     "testNormalOperation"
-
   ];
 
   passthru = {
