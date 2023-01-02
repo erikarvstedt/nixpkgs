@@ -248,6 +248,7 @@ in
 
     systemd.services.paperless-task-queue = {
       description = "Paperless Celery Workers";
+      after = [ "paperless-scheduler.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
         ExecStart = "${pkg}/bin/celery --app paperless worker --loglevel INFO";
@@ -258,7 +259,6 @@ in
         PrivateNetwork = false;
       };
       environment = env;
-      after = [ "paperless-scheduler.service" ];
     };
 
     # Reading the user-provided password file requires root access
@@ -276,6 +276,7 @@ in
 
     systemd.services.paperless-consumer = {
       description = "Paperless document consumer";
+      after = [ "paperless-scheduler.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
         ExecStart = "${pkg}/bin/paperless-ngx document_consumer";
@@ -285,11 +286,11 @@ in
       # Bind to `paperless-scheduler` so that the consumer never runs
       # during migrations
       bindsTo = [ "paperless-scheduler.service" ];
-      after = [ "paperless-scheduler.service" ];
     };
 
     systemd.services.paperless-web = {
       description = "Paperless web server";
+      after = [ "paperless-scheduler.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
         ExecStart = ''
@@ -316,7 +317,6 @@ in
       # Bind to `paperless-scheduler` so that the web server never runs
       # during migrations
       bindsTo = [ "paperless-scheduler.service" ];
-      after = [ "paperless-scheduler.service" ];
     };
 
     users = optionalAttrs (cfg.user == defaultUser) {
