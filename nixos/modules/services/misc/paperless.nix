@@ -212,15 +212,14 @@ in
 
     systemd.services.paperless-scheduler = {
       description = "Paperless Celery Beat";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "paperless-consumer.service" "paperless-web.service" "paperless-task-queue.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
         ExecStart = "${pkg}/bin/celery --app paperless beat --loglevel INFO";
         Restart = "on-failure";
       };
       environment = env;
-      wantedBy = [ "multi-user.target" ];
-      wants = [ "paperless-consumer.service" "paperless-web.service" "paperless-task-queue.service" ];
-
       preStart = ''
         ln -sf ${manage} ${cfg.dataDir}/paperless-manage
 
@@ -276,6 +275,9 @@ in
 
     systemd.services.paperless-consumer = {
       description = "Paperless document consumer";
+      # Bind to `paperless-scheduler` so that the consumer never runs
+      # during migrations
+      bindsTo = [ "paperless-scheduler.service" ];
       after = [ "paperless-scheduler.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
@@ -283,13 +285,13 @@ in
         Restart = "on-failure";
       };
       environment = env;
-      # Bind to `paperless-scheduler` so that the consumer never runs
-      # during migrations
-      bindsTo = [ "paperless-scheduler.service" ];
     };
 
     systemd.services.paperless-web = {
       description = "Paperless web server";
+      # Bind to `paperless-scheduler` so that the web server never runs
+      # during migrations
+      bindsTo = [ "paperless-scheduler.service" ];
       after = [ "paperless-scheduler.service" ];
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
@@ -314,9 +316,6 @@ in
       # Allow the web interface to access the private /tmp directory of the server.
       # This is required to support uploading files via the web interface.
       unitConfig.JoinsNamespaceOf = "paperless-task-queue.service";
-      # Bind to `paperless-scheduler` so that the web server never runs
-      # during migrations
-      bindsTo = [ "paperless-scheduler.service" ];
     };
 
     users = optionalAttrs (cfg.user == defaultUser) {
