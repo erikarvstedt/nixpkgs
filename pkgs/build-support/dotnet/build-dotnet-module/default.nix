@@ -190,7 +190,7 @@ stdenvNoCC.mkDerivation (args // {
             esac
         done
 
-        export tmp=$(mktemp -td "${pname}-tmp-XXXXXX")
+        export tmp=$(mktemp -d "/tmp/deps-${pname}-XXXXXX")
         HOME=$tmp/home
 
         exitTrap() {
