@@ -2,10 +2,9 @@
 , buildPythonPackage
 , fetchPypi
 , pythonOlder
-, python-Levenshtein
-, pycodestyle
-, hypothesis
 , pytestCheckHook
+, hypothesis
+, python-Levenshtein
 }:
 
 buildPythonPackage rec {
@@ -22,10 +21,14 @@ buildPythonPackage rec {
 
   propagatedBuildInputs = [ python-Levenshtein ];
 
-  # We don't want to lint the code.
+  # Skip linting
   postPatch = ''
     substituteInPlace test_thefuzz.py --replace "import pycodestyle" ""
   '';
+
+  pythonImportsCheck = [
+    "thefuzz"
+  ];
 
   checkInputs = [
     hypothesis
@@ -33,7 +36,7 @@ buildPythonPackage rec {
   ];
 
   disabledTests = [
-    # We don't want to lint the code.
+    # Skip linting
     "test_pep8_conformance"
   ];
 
