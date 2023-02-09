@@ -10,11 +10,13 @@ let
   # Don't start a redis instance if the user sets a custom redis connection
   enableRedis = !hasAttr "PAPERLESS_REDIS" cfg.extraConfig;
   redisServer = config.services.redis.servers.paperless;
+  nltkDir = "${cfg.dataDir}/nltk";
 
   env = {
     PAPERLESS_DATA_DIR = cfg.dataDir;
     PAPERLESS_MEDIA_ROOT = cfg.mediaDir;
     PAPERLESS_CONSUMPTION_DIR = cfg.consumptionDir;
+    PAPERLESS_NLTK_DIR = nltkDir;
     GUNICORN_CMD_ARGS = "--bind=${cfg.address}:${toString cfg.port}";
   } // optionalAttrs (config.time.timeZone != null) {
     PAPERLESS_TIME_ZONE = config.time.timeZone;
@@ -204,6 +206,7 @@ in
 
     systemd.tmpfiles.rules = [
       "d '${cfg.dataDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
+      "d '${nltkDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
       "d '${cfg.mediaDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
       (if cfg.consumptionDirIsPublic then
         "d '${cfg.consumptionDir}' 777 - - - -"
@@ -290,6 +293,32 @@ in
             '${cfg.passwordFile}' '${cfg.dataDir}/superuser-password'
         '';
         Type = "oneshot";
+      };
+    };
+
+    # Download NLTK corpus data
+    systemd.services.paperless-download-nltk-data = {
+      wantedBy = [ "paperless-scheduler.service" ];
+      before = [ "paperless-scheduler.service" ];
+      after = [ "network-online.target" ];
+      serviceConfig = defaultServiceConfig // {
+        User = cfg.user;
+        Type = "oneshot";
+        # Enable internet access
+        PrivateNetwork = false;
+        BindPaths = [ nltkDir ];
+        BindReadOnlyPaths = [
+          "/nix/store"
+          "-/etc/resolv.conf"
+          "-/etc/nsswitch.conf"
+          "-/etc/ssl/certs"
+          "-/etc/static/ssl/certs"
+          "-/etc/hosts"
+          "-/etc/localtime"
+        ];
+        ExecStart = let pythonWithNltk = pkg.python.withPackages (ps: [ ps.nltk ]); in ''
+          ${pythonWithNltk}/bin/python -m nltk.downloader -d '${nltkDir}' punkt snowball_data stopwords
+        '';
       };
     };
 
