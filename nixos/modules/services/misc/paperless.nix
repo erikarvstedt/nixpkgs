@@ -6,11 +6,11 @@ let
   pkg = cfg.package;
 
   defaultUser = "paperless";
+  nltkDir = "/var/cache/paperless/nltk";
 
   # Don't start a redis instance if the user sets a custom redis connection
   enableRedis = !hasAttr "PAPERLESS_REDIS" cfg.extraConfig;
   redisServer = config.services.redis.servers.paperless;
-  nltkDir = "${cfg.dataDir}/nltk";
 
   env = {
     PAPERLESS_DATA_DIR = cfg.dataDir;
@@ -50,6 +50,7 @@ let
       cfg.consumptionDir
       cfg.dataDir
       cfg.mediaDir
+      nltkDir
     ];
     CapabilityBoundingSet = "";
     # ProtectClock adds DeviceAllow=char-rtc r
@@ -206,8 +207,8 @@ in
 
     systemd.tmpfiles.rules = [
       "d '${cfg.dataDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
-      "d '${nltkDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
       "d '${cfg.mediaDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
+      "d '${nltkDir}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
       (if cfg.consumptionDirIsPublic then
         "d '${cfg.consumptionDir}' 777 - - - -"
       else
