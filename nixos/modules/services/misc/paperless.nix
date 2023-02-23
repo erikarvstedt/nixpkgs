@@ -10,7 +10,7 @@ let
   # Don't start a redis instance if the user sets a custom redis connection
   enableRedis = !hasAttr "PAPERLESS_REDIS" cfg.extraConfig;
   redisServer = config.services.redis.servers.paperless;
-  nltkDir = "${cfg.dataDir}/nltk";
+  nltkDir = "/var/cache/paperless/nltk";
 
   env = {
     PAPERLESS_DATA_DIR = cfg.dataDir;
