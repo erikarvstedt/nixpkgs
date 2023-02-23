@@ -296,68 +296,29 @@ in
       };
     };
 
-    # The following service downloads data for NLTK before the scheduler is
-    # started. Theoretically, this should be possible in an ExecStartPre
-    # directive of service paperless-scheduler. But even with the '+' prefix,
-    # some restrictions were still applied to the download script. Those
-    # restrictions prevented the script from downloading any data. This might be
-    # a bug in systemd. But anyway, moving this task to its own unit has also
-    # security advantages. While commands in a ExecStartPre directive do not
-    # have any restrictions when they are prefixed with '+' (theoretically), we
-    # can put as many restrictions as possible on this service.
+    # Download NLTK corpus data
     systemd.services.paperless-download-nltk-data = {
       wantedBy = [ "paperless-scheduler.service" ];
       before = [ "paperless-scheduler.service" ];
-      script = let pythonWithNltk = pkg.python.withPackages (ps: [ ps.nltk ]); in
-        ''
-          ${pythonWithNltk}/bin/python -m nltk.downloader -d "${nltkDir}" punkt snowball_data stopwords
-        '';
-      serviceConfig = {
-        Type = "oneshot";
+      after = [ "network-online.target" ];
+      serviceConfig = defaultServiceConfig // {
         User = cfg.user;
-
-        # Secure this service
-        ReadWritePaths = [ cfg.dataDir ];
-        CapabilityBoundingSet = "";
-        # ProtectClock adds DeviceAllow=char-rtc r
-        DeviceAllow = "";
-        LockPersonality = true;
-        MemoryDenyWriteExecute = true;
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        PrivateMounts = true;
-        PrivateTmp = true;
-        PrivateUsers = true;
-        ProtectClock = true;
-        ProtectHome = true;
-        ProtectHostname = true;
-        ProtectSystem = "strict";
-        ProtectControlGroups = true;
-        ProtectKernelLogs = true;
-        ProtectKernelModules = true;
-        ProtectKernelTunables = true;
-        ProtectProc = "noaccess";
-        ProcSubset = "pid";
-        RemoveIPC = true;
-        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        SystemCallArchitectures = "native";
-        SystemCallFilter = [
-          "~@clock"
-          "~@cpu-emulation"
-          "~@debug"
-          "~@module"
-          "~@mount"
-          "~@obsolete"
-          "~@privileged"
-          "~@raw-io"
-          "~@reboot"
-          "~@resources"
-          "~@swap"
+        Type = "oneshot";
+        # Enable internet access
+        PrivateNetwork = false;
+        BindPaths = [ nltkDir ];
+        BindReadOnlyPaths = [
+          "/nix/store"
+          "-/etc/resolv.conf"
+          "-/etc/nsswitch.conf"
+          "-/etc/ssl/certs"
+          "-/etc/static/ssl/certs"
+          "-/etc/hosts"
+          "-/etc/localtime"
         ];
-        UMask = "7077";
+        ExecStart = let pythonWithNltk = pkg.python.withPackages (ps: [ ps.nltk ]); in ''
+          ${pythonWithNltk}/bin/python -m nltk.downloader -d '${nltkDir}' punkt snowball_data stopwords
+        '';
       };
     };
 
