@@ -28,9 +28,7 @@ let
 
   manage =
     let
-      # Using ' here helps with variables like PAPERLESS_CONSUMER_IGNORE_PATTERN
-      # that are encoded JSON and _also_ need to be passed to SystemD ...
-      setupEnv = lib.concatStringsSep "\n" (mapAttrsToList (name: val: "export ${name}='${val}'") env);
+      setupEnv = lib.concatStringsSep "\n" (mapAttrsToList (name: val: "export ${name}=${escapeShellArg val}") env);
     in
     pkgs.writeShellScript "manage" ''
       ${setupEnv}
