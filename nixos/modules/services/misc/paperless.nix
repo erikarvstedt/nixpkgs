@@ -306,17 +306,6 @@ in
         Type = "oneshot";
         # Enable internet access
         PrivateNetwork = false;
-        # Restrict write access
-        BindPaths = [];
-        BindReadOnlyPaths = [
-          "/nix/store"
-          "-/etc/resolv.conf"
-          "-/etc/nsswitch.conf"
-          "-/etc/ssl/certs"
-          "-/etc/static/ssl/certs"
-          "-/etc/hosts"
-          "-/etc/localtime"
-        ];
         ExecStart = let pythonWithNltk = pkg.python.withPackages (ps: [ ps.nltk ]); in ''
           ${pythonWithNltk}/bin/python -m nltk.downloader -d '${nltkDir}' punkt snowball_data stopwords
         '';
