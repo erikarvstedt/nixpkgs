@@ -326,18 +326,33 @@ in
       environment = env;
     };
 
-    systemd.services.paperless-web = {
+    systemd.services.paperless-web = let
+      secretKeyFile = "${cfg.dataDir}/nixos-paperless-secret-key";
+    in {
       description = "Paperless web server";
       # Bind to `paperless-scheduler` so that the web server never runs
       # during migrations
       bindsTo = [ "paperless-scheduler.service" ];
       after = [ "paperless-scheduler.service" ];
+      preStart = ''
+        if [ ! -f "${secretKeyFile}" ]; then
+          (
+            umask 0377
+            tr -dc A-Za-z0-9 < /dev/urandom | head -c64 > "${secretKeyFile}"
+          )
+        fi
+      '';
+      script = ''
+        export PAPERLESS_SECRET_KEY="$(cat "${secretKeyFile}")"
+        if [ -z "$PAPERLESS_SECRET_KEY" ]; then
+          echo "PAPERLESS_SECRET_KEY is unset or empty, refusing to start."
+          exit 1
+        fi
+        ${pkg.python.pkgs.gunicorn}/bin/gunicorn \
+          -c ${pkg}/lib/paperless-ngx/gunicorn.conf.py paperless.asgi:application
+      '';
       serviceConfig = defaultServiceConfig // {
         User = cfg.user;
-        ExecStart = ''
-          ${pkg.python.pkgs.gunicorn}/bin/gunicorn \
-            -c ${pkg}/lib/paperless-ngx/gunicorn.conf.py paperless.asgi:application
-        '';
         Restart = "on-failure";
 
         # gunicorn needs setuid, liblapack needs mbind
@@ -349,7 +364,6 @@ in
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
       };
       environment = env // {
-        PATH = mkForce pkg.path;
         PYTHONPATH = "${pkg.python.pkgs.makePythonPath pkg.propagatedBuildInputs}:${pkg}/lib/paperless-ngx/src";
       };
       # Allow the web interface to access the private /tmp directory of the server.
