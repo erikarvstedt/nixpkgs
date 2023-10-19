@@ -338,7 +338,7 @@ in
         if [ ! -f "${secretKeyFile}" ]; then
           (
             umask 0377
-            tr -dc A-Za-z0-9 < /dev/urandom | head -c64 > "${secretKeyFile}"
+            tr -dc A-Za-z0-9 < /dev/urandom | head -c64 | ${pkgs.moreutils}/bin/sponge '${secretKeyFile}'
           )
         fi
       '';
