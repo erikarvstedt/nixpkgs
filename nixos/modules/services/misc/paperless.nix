@@ -334,6 +334,9 @@ in
       # during migrations
       bindsTo = [ "paperless-scheduler.service" ];
       after = [ "paperless-scheduler.service" ];
+      # Setup PAPERLESS_SECRET_KEY.
+      # If this environment variable is left unset, paperless-ngx defaults
+      # to a well-known value, which is insecure.
       script = ''
         if [[ ! -f '${secretKeyFile}' ]]; then
           (
