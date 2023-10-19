@@ -346,7 +346,7 @@ in
           echo "PAPERLESS_SECRET_KEY is unset or empty, refusing to start."
           exit 1
         fi
-        ${pkg.python.pkgs.gunicorn}/bin/gunicorn \
+        exec ${pkg.python.pkgs.gunicorn}/bin/gunicorn \
           -c ${pkg}/lib/paperless-ngx/gunicorn.conf.py paperless.asgi:application
       '';
       serviceConfig = defaultServiceConfig // {
