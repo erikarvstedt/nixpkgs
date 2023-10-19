@@ -335,14 +335,14 @@ in
       bindsTo = [ "paperless-scheduler.service" ];
       after = [ "paperless-scheduler.service" ];
       script = ''
-        if [ ! -f "${secretKeyFile}" ]; then
+        if [[ ! -f '${secretKeyFile}' ]]; then
           (
             umask 0377
             tr -dc A-Za-z0-9 < /dev/urandom | head -c64 | ${pkgs.moreutils}/bin/sponge '${secretKeyFile}'
           )
         fi
-        export PAPERLESS_SECRET_KEY="$(cat "${secretKeyFile}")"
-        if [ -z "$PAPERLESS_SECRET_KEY" ]; then
+        export PAPERLESS_SECRET_KEY=$(cat '${secretKeyFile}')
+        if [[ ! $PAPERLESS_SECRET_KEY ]]; then
           echo "PAPERLESS_SECRET_KEY is unset or empty, refusing to start."
           exit 1
         fi
