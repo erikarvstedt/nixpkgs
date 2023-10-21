@@ -326,9 +326,7 @@ in
       environment = env;
     };
 
-    systemd.services.paperless-web = let
-      secretKeyFile = "${cfg.dataDir}/nixos-paperless-secret-key";
-    in {
+    systemd.services.paperless-web = {
       description = "Paperless web server";
       # Bind to `paperless-scheduler` so that the web server never runs
       # during migrations
@@ -337,7 +335,9 @@ in
       # Setup PAPERLESS_SECRET_KEY.
       # If this environment variable is left unset, paperless-ngx defaults
       # to a well-known value, which is insecure.
-      script = ''
+      script = let
+        secretKeyFile = "${cfg.dataDir}/nixos-paperless-secret-key";
+      in ''
         if [[ ! -f '${secretKeyFile}' ]]; then
           (
             umask 0377
