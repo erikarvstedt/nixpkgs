@@ -208,9 +208,6 @@ in
               ++ lib.splitString "+" cfg.settings.PAPERLESS_OCR_LANGUAGE
           else null;
         };
-        packageOverrides = final: prev: {
-          ocrmypdf = prev.ocrmypdf.override { tesseract = tesseract5; };
-        };
       };
     };
 
