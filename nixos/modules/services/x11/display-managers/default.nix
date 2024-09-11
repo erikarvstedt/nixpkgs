@@ -257,6 +257,11 @@ in
           # `services.xserver.displayManager.session` entries. Called from
           # `sessionWrapper`.
 
+          function atExit() {
+            ${fakeSession "stop"}
+          }
+          trap "atExit" EXIT
+
           # Start the window manager.
           ${wm.start}
 
@@ -268,9 +273,6 @@ in
           ''}
 
           test -n "$waitPID" && wait "$waitPID"
-
-          ${fakeSession "stop"}
-
           exit 0
         '';
       in
