@@ -32,17 +32,23 @@ let
     else toString s
   ) cfg.settings);
 
-  manage = pkgs.writeShellScriptBin "paperless-manage" ''
+  manage = let
+    sudoImplementation =
+      if config.security.sudo.enable || config.security.sudo-rs.enable then
+        "sudo"
+      else if config.security.doas.enable then
+        "doas"
+      else
+        throw "The `paperless` module requires `sudo` or `doas` to be enabled";
+  in pkgs.writeShellScriptBin "paperless-manage" ''
+    if [[ $USER != ${cfg.user} ]]; then
+      exec /run/wrappers/bin/${sudoImplementation} -u ${cfg.user} "''${BASH_SOURCE[0]}" "$@"
+    fi
     set -o allexport # Export the following env vars
     ${lib.toShellVars env}
     ${lib.optionalString (cfg.environmentFile != null) "source ${cfg.environmentFile}"}
-
     cd ${cfg.dataDir}
-    sudo=exec
-    if [[ "$USER" != ${cfg.user} ]]; then
-      sudo='exec /run/wrappers/bin/sudo -u ${cfg.user} -E'
-    fi
-    $sudo ${cfg.package}/bin/paperless-ngx "$@"
+    exec ${cfg.package}/bin/paperless-ngx "$@"
   '';
 
   defaultServiceConfig = {
