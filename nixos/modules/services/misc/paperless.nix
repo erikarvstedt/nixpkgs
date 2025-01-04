@@ -497,6 +497,9 @@ in
       "d '${cfg.exporter.directory}' - ${cfg.user} ${config.users.users.${cfg.user}.group} - -"
     ];
 
+    services.paperless.exporter.options =
+      lib.mapAttrs (n: v: lib.mkDefault v) options.services.paperless.exporter.options.default;
+
     systemd.services.paperless-exporter = {
       startAt = lib.defaultTo [] cfg.exporter.onCalendar;
 
