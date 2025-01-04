@@ -520,12 +520,14 @@ in
         OnSuccess = services;
       };
       enableStrictShellChecks = true;
-      script = ''
+      script = let
+        finalOptions = options.services.paperless.exporter.options.default // cfg.exporter.options;
+      in ''
         echo "Running pre script ..."
         ${cfg.exporter.preScript}
 
         echo "Exporting documents ..."
-        ./paperless-manage document_exporter ${cfg.exporter.directory} ${lib.cli.toGNUCommandLineShell {} cfg.exporter.options}
+        ./paperless-manage document_exporter ${cfg.exporter.directory} ${lib.cli.toGNUCommandLineShell {} finalOptions}
 
         echo "Running post script ..."
         ${cfg.exporter.postScript}
