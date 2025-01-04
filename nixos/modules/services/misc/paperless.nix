@@ -287,6 +287,7 @@ in
           "delete" = true;
          };
          description = "Options to pass to the document exporter";
+         apply = x: options.services.paperless.exporter.options.default // x;
       };
 
       preScript = lib.mkOption {
