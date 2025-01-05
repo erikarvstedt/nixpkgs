@@ -254,7 +254,6 @@ in
     };
 
     exporter = {
-
       enable = lib.mkEnableOption "regular automatic document exports";
 
       directory = lib.mkOption {
@@ -279,30 +278,28 @@ in
       };
 
       settings = lib.mkOption {
-         type = with lib.types; attrsOf anything;
-         default = {
+        type = with lib.types; attrsOf anything;
+        default = {
           "no-progress-bar" = true;
           "no-color" = true;
           "compare-checksums" = true;
           "delete" = true;
-         };
-         description = "Settings to pass to the document exporter as CLI arguments.";
+        };
+        description = "Settings to pass to the document exporter as CLI arguments.";
       };
 
       preScript = lib.mkOption {
-         type = lib.types.lines;
-         default = "";
-         description = "Script to run right before the export";
+        type = lib.types.lines;
+        default = "";
+        description = "Script to run right before the export";
       };
 
       postScript = lib.mkOption {
-         type = lib.types.lines;
-         default = "";
-         description = "Script to run after finishing the export";
+        type = lib.types.lines;
+        default = "";
+        description = "Script to run after finishing the export";
       };
-
     };
-
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [ {
@@ -501,12 +498,10 @@ in
 
     systemd.services.paperless-exporter = {
       startAt = lib.defaultTo [] cfg.exporter.onCalendar;
-
       serviceConfig = {
         User = cfg.user;
         WorkingDirectory = cfg.dataDir;
       };
-
       unitConfig = let
         services = [
           "paperless-consumer.service"
@@ -535,5 +530,4 @@ in
     };
   })
   ]);
-
 }
