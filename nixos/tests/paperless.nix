@@ -13,7 +13,7 @@ import ./make-test-python.nix ({ lib, ... }: {
           enable = true;
 
           settings = {
-            "no-color" = false; # override a default option
+            "no-color" = lib.mkForce false; # override a default option
             "no-thumbnail" = true; # add a new option
           };
 
