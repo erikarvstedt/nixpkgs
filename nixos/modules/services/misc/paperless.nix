@@ -267,12 +267,9 @@ in
         type = lib.types.nullOr lib.types.str;
         default = "01:30:00";
         description = ''
-          When to run the exporter.
+          When to run the exporter. See {manpage}`systemd.time(7)`.
 
-          Fills in the OnCalendar section of a timer and uses a systemd.time(7)
-          format.
-
-          `null` disables the timer; allowing you to trigger the
+          `null` disables the timer; allowing you to run the
           `paperless-exporter` service through other means.
         '';
       };
