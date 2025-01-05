@@ -90,8 +90,7 @@ import ./make-test-python.nix ({ lib, ... }: {
         metadata = json.loads(node.succeed("curl -u admin:admin -fs localhost:28981/api/documents/3/metadata/"))
         assert "original_checksum" in metadata
 
-      # Check exporter config looks good
-      with subtest("Exporter config is good"):
+      with subtest("Exporter"):
           node.succeed("systemctl start --wait paperless-exporter")
           node.wait_for_unit("paperless-web.service")
           node.wait_for_unit("paperless-consumer.service")
